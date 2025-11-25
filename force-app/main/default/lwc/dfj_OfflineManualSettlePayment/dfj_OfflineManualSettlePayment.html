@@ -1,0 +1,75 @@
+<template>
+    <template lwc:if={isShowOfflineSettleButton}>
+        <lightning-button label={buttonLabel} variant="brand" onclick={handleSettleButtonClick}></lightning-button>
+    </template>
+
+
+    <template lwc:if={isOpenOfflineManualSettleModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <fieldset class="slds-box">
+                        <legend class="slds-text-heading_medium">&nbsp;Bank Transfer&nbsp;</legend>
+
+                        <div class="slds-p-around_medium" >
+                            <table class="tableUsedForManualSettleInputs">
+                                <tr>
+                                    <td>
+                                        <lightning-input label= "Comment"
+                                                         onchange={handleCommentInputForManualSettle}
+                                        ></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-input label= "Reference"
+                                                         onchange={handleReferenceInputForManualSettle}
+                                        ></lightning-input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <lightning-combobox label= "Method"
+                                                            required="true"
+                                                            value={defaultValueOfMethodForManualSettle}
+                                                            disabled="true"
+                                                            options={optionsForMethodOfManualSettle}
+                                        ></lightning-combobox>
+                                    </td>
+                                    <td>
+                                        <lightning-input label= "Payment Date"
+                                                         required="true"
+                                                         type="date"
+                                                         value={dateInputForManualSettle}
+                                                         disabled="true"
+                                        ></lightning-input>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="amountInfoContainer slds-m-top_medium" style="text-align: right">
+                                <div class="slds-m-top_x-large">
+
+                                    <lightning-button label='Cancel' onclick={handleCancelButtonClick}>
+
+                                    </lightning-button>
+                                    &nbsp;&nbsp;
+                                    <lightning-button label='Confirm'
+                                                      variant="brand"
+                                                      disabled={isConfirmButtonDisabled}
+                                                      onclick={handleConfirmButtonClick}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </fieldset>
+                </div>
+
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

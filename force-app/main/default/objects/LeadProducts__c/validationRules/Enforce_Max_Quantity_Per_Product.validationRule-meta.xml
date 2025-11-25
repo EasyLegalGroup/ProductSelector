@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enforce_Max_Quantity_Per_Product</fullName>
+    <active>false</active>
+    <description>If a Product has a Max Qty Per Order, this validation rule blocks higher quantities of it.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Product__r.Maximum_Quantity_Per_Order__c)),
+    Quantity__c &gt; Product__r.Maximum_Quantity_Per_Order__c
+)</errorConditionFormula>
+    <errorDisplayField>Quantity__c</errorDisplayField>
+    <errorMessage>You can&apos;t order more than the allowed maximum quantity for this product.</errorMessage>
+</ValidationRule>

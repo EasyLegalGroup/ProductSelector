@@ -1,0 +1,357 @@
+<template>
+    <template if:true={isOnProductSelector}>
+        <template if:false={hideCreatePaymentButton}>
+            <lightning-button label="Create Payment" variant="brand" icon-name="utility:billing" onclick={handlerCreatePaymentButtonClick} disabled={disableCreatePayment}>
+            </lightning-button>
+        </template>
+    </template>
+
+   
+    <!-- <template if:false={isOnProductSelector}>
+        <lightning-card>
+            <div class="slds-p-around_small">
+
+                <fieldset class="slds-box">
+
+                    <legend class="slds-text-heading_medium">Payment Status</legend>
+
+                    <template lwc:if={tempVariableToHideOrShowPaymentCreatedStatus}>
+
+                        <div>
+
+                            <div class="container-status-button-and-refresh-icon-clickable">
+
+                                <div class="slds-text-heading_small centered-text">Status:&nbsp;{paymentStatus}</div>
+
+                                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                    onclick={handleRefreshIconClick} class="right-icon-button"></lightning-button-icon>
+
+                            </div>
+
+                            <div class="slds-p-top_x-small slds-align_absolute-center">
+                                <lightning-button label="Create Payment" icon-name="utility:billing" variant="brand"
+                                    onclick={handlerCreatePaymentButtonClick} disabled={disableCreatePayment}></lightning-button>
+                            </div>
+
+                        </div>
+
+                    </template>
+
+                    <template lwc:if={isPaymentRecordAvailable}>
+
+
+                        <div class="slds-p-vertical_small container-billing-info-and-refresh-icon-clickable">
+                            <div>
+                                <div class="slds-text-heading_small "><b>Billing Information</b></div>
+                                <br>
+                                <div class="slds-text-heading_small">{opportunityName}</div>
+                                <div class="slds-text-heading_small">{billingStreet}</div>
+                                <div class="slds-text-heading_small">{postalCodeFromPaymentRecord} &nbsp; &nbsp;
+                                    {billingCityFromPaymentRecord} </div>
+                            </div>
+                            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
+                                onclick={handleRefreshIconClick} class="right-icon-button"></lightning-button-icon>
+                        </div>
+
+                        <div class="slds-p-vertical_small">
+                            <div class="slds-text-heading_small "><b>Subscription Information</b></div>
+                            <br>
+                            <div class="slds-text-heading_small">
+                                Subscription Status:&nbsp;
+                                <span class="slds-text-heading_small ">
+                                    <template lwc:if={isSubscriptionStatusAccepted}>
+                                        <span class="slds-text-color_success">
+                                            <b>{subscriptionStatusToShow}</b>
+                                        </span>
+                                    </template>
+                                    <template lwc:else>
+                                        <b>{subscriptionStatusToShow}</b>
+                                    </template>
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="slds-p-vertical_small">
+                            <div class="slds-text-heading_small">
+                                <b>Order Value:&nbsp;</b>
+                                <span class="slds-text-heading_small">
+                                    <lightning-formatted-number currency-code={currencyIsoCodeForPaymentStatus}
+                                        currency-display-as="symbol" format-style="currency"
+                                        value={paymentTotal}></lightning-formatted-number>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="slds-p-vertical_small">
+                            <div class="slds-text-heading_small">
+                                <template
+                                    lwc:if={isSubscriptionStatusNotAcceptedAndOppProdsContainsOnlySubscriptionProds}>
+                                    <lightning-formatted-url value={subscriptionLink}
+                                        label="Subscription acceptation link."
+                                        target="_blank"></lightning-formatted-url>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-formatted-url value={paymentLinkForPaymentStatus} label="Payment link"
+                                        target="_blank"></lightning-formatted-url>
+                                </template>
+                            </div>
+                        </div>
+
+
+                        <div class={classOfPaymentStatusContainer}> {paymentStatus}</div>
+
+                        <div class="slds-m-top_small slds-text-align_right">
+                            <lightning-button variant="brand" label="Cancel payment" icon-name="utility:close"
+                                icon-position="left" onclick={handleCancelPayment}></lightning-button>
+                        </div>
+
+                    </template>
+
+                </fieldset>
+
+            </div>
+
+
+
+        </lightning-card>
+
+    </template> -->
+
+    <template lwc:if={toShowOrderOverviewModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <div class="slds-m-around_medium">
+                    <template if:true={isLoadedSpinner} class="slds-is-relative">
+                        <lightning-spinner alternative-text="Loading..." variant="brand">
+                        </lightning-spinner>
+                    </template>
+
+                </div>
+
+                <!-- Modal/Popup Box LWC body starts here -->
+
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+                    <fieldset class="slds-box">
+                        <legend class="slds-text-heading_medium slds-text-align_center">
+                            <strong>&nbsp;CONFIRM&nbsp;ORDER&nbsp;</strong>
+                        </legend>
+                        <div class=" slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-vertical_none">
+                            <div
+                                class="slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-horizontal_none">
+
+
+                                <div class="slds-text-heading_small slds-text-align_left">
+                                    <p><b>Name:</b> {accRecord.Name}</p>
+                                </div>
+
+                                &nbsp;&nbsp;
+
+                                <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Email:</b> {accRecord.PersonEmail}</p>
+                                </div>
+
+                                &nbsp;&nbsp;
+
+                                <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Phone:</b> {accRecord.Phone}</p>
+                                </div>
+
+                                &nbsp;&nbsp;
+
+                                <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Address:</b> {accRecord.BillingStreet} {accRecord.BillingState}
+                                        {accRecord.BillingCountry}</p></b>
+                                </div>
+
+                                &nbsp;&nbsp;
+
+                                <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Postal Code / City:</b> {accRecord.BillingPostalCode}
+                                        {accRecord.BillingCity}</p>
+                                </div>
+
+                                &nbsp;&nbsp;
+
+                                <div>
+                                    <p></p>
+                                </div>
+                                <div class="slds-text-heading_medium slds-text-align_left">
+                                    <b>Product Information</b>
+                                </div>&nbsp;&nbsp;
+
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered anotherhover "
+                                    style="table-layout: fixed;">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                <div class="slds-truncate slds-text-align_center slds-p-around_x-small"
+                                                    title="Product Name">Product
+                                                </div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                <div class="slds-truncate slds-text-align_center slds-p-around_x-small"
+                                                    title="Item Price">Item price
+                                                </div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                <div class="slds-truncate slds-text-align_center slds-p-around_x-small"
+                                                    title="Quantity">Quanity
+                                                </div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                <div class="slds-truncate slds-text-align_center slds-p-around_x-small"
+                                                    title="Subtotal">Subtotal
+                                                </div>
+                                            </th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody class="">
+
+
+                                        <template for:each={oppProducts} for:item="pro" for:index="tabIndex">
+
+                                            <tr key={pro.Id} class="slds-hint-parent">
+                                                <th class="slds-cell-wrap" scope="col">
+                                                    <div class="slds-truncate  slds-text-align_center"
+                                                        title={pro.Product2.Name}>
+                                                        <b>
+                                                            <lightning-formatted-text
+                                                                    value={pro.Product2.Name}></lightning-formatted-text>
+                                                        </b>
+                                                    </div>
+                                                </th>
+
+                                                <th scope="col" class="slds-cell-wrap ">
+                                                    <div class="slds-truncate slds-text-align_center">
+                                                        <lightning-formatted-number value={pro.UnitPrice}
+                                                            format-style="currency" currency-code={pro.CurrencyIsoCode}
+                                                            currency-display-as="symbol"></lightning-formatted-number>
+                                                        <!--{!pro.CurrencyIsoCode}&nbsp;&nbsp;{!pro.Item_Price__c}-->
+                                                    </div>
+                                                </th>
+                                                <th class="slds-cell-wrap " scope="col">
+                                                    <div align="right" class="slds-truncate slds-text-align_center">
+                                                        {pro.Quantity}
+                                                    </div>
+                                                </th>
+
+                                                <th class="slds-cell-wrap " scope="col">
+                                                    <div class="slds-truncate slds-text-align_center">
+                                                        <lightning-formatted-number value={pro.Net_Total_Price__c}
+                                                            format-style="currency" currency-code={pro.CurrencyIsoCode}
+                                                            currency-display-as="symbol"></lightning-formatted-number>
+                                                    </div>
+                                                </th>
+                                            </tr>
+
+
+                                            <!-- End -->
+
+                                        </template>
+
+
+                                    </tbody>
+
+                                </table>
+                                &nbsp;&nbsp;
+
+                                <lightning-layout multiple-rows="true">
+
+
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <div class="slds-float_left" title="Sub Total"><b>Sub Total</b></div>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <lightning-formatted-number value={subTotalForConfirmOrderPage}
+                                            format-style="currency" currency-code={isoCode}
+                                            currency-display-as="symbol"></lightning-formatted-number>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="6" medium-device-size="6"
+                                        small-device-size="12"></lightning-layout-item>
+
+                                </lightning-layout> &nbsp;&nbsp;
+
+                                <lightning-layout multiple-rows="true">
+
+
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <div class="slds-float_left" title="Fixed Discount"><b>Fixed Discount</b>
+                                        </div>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <lightning-formatted-number value={fixedDiscountValueForConfirmOrderModal}
+                                            format-style="currency" currency-code={isoCode}
+                                            currency-display-as="symbol"></lightning-formatted-number>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="6" medium-device-size="6"
+                                        small-device-size="12"></lightning-layout-item>
+
+                                </lightning-layout> &nbsp;&nbsp;
+
+
+                                <lightning-layout multiple-rows="true">
+
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <div class="slds-float_left" title="Order Total"><b>Order Total</b></div>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <u>
+                                            <lightning-formatted-number value={orderTotalFromOpp}
+                                                format-style="currency" currency-code={isoCode}
+                                                currency-display-as="symbol"></lightning-formatted-number>
+                                        </u>
+                                    </lightning-layout-item>
+
+                                </lightning-layout> &nbsp;&nbsp;
+
+
+                                <lightning-layout multiple-rows="true">
+
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        <div class="slds-float_left" title="Order Total">
+                                            <b>
+                                                    Subscription:
+                                                </b>
+                                        </div>
+                                    </lightning-layout-item>
+                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
+                                        small-device-size="12">
+                                        {subscriptionStatusValueForConfirmOrderPage}
+                                    </lightning-layout-item>
+
+                                </lightning-layout>
+
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+
+                    <lightning-button variant="brand" style="padding-right: 6px;" label="Confirm" name="Confirm"
+                        onclick={handleConfirmButtonClick}>
+                    </lightning-button>
+
+                    <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={closeModal}>
+                    </lightning-button>
+
+
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

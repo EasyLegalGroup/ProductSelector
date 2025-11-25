@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Discount__c</columns>
+    <columns>Item_Price__c</columns>
+    <columns>Pricebook_Id__c</columns>
+    <columns>PricebookEntry_Id__c</columns>
+    <columns>Product_Name__c</columns>
+    <columns>Product_Id__c</columns>
+    <columns>Quantity__c</columns>
+    <columns>Lead__c</columns>
+    <columns>Sub_Total__c</columns>
+    <columns>Provision_Base__c</columns>
+    <columns>CREATEDBY_USER.ALIAS</columns>
+    <columns>CREATED_DATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>NAME</field>
+        <operation>notContain</operation>
+        <value>Membership</value>
+    </filters>
+    <label>All</label>
+</ListView>

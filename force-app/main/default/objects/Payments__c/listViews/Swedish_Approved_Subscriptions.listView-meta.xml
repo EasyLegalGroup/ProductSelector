@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Swedish_Approved_Subscriptions</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Lead__c</columns>
+    <columns>Order__c</columns>
+    <columns>Status__c</columns>
+    <columns>Subscription_status__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>Type__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Owner_s_Market_Unit__c</field>
+        <operation>equals</operation>
+        <value>FA_SE</value>
+    </filters>
+    <filters>
+        <field>Subscription_status__c</field>
+        <operation>equals</operation>
+        <value>Subscription Approved,Accepted</value>
+    </filters>
+    <label>Swedish Approved Subscriptions</label>
+</ListView>

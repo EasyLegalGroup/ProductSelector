@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Discount_Products_Must_Be_Backend_Create</fullName>
+    <active>false</active>
+    <errorConditionFormula>AND(
+    Is_Discount_Product__c = TRUE,
+    Is_Backend_Created__c = FALSE
+)</errorConditionFormula>
+    <errorMessage>Discount products can only be created through the backend logic.</errorMessage>
+</ValidationRule>

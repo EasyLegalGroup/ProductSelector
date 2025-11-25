@@ -1,0 +1,33 @@
+.THIS .borderRadius { 
+  border-radius : 0.3rem;
+}
+
+.THIS .statusColorRed { 
+  background-color: rgb(167, 58, 58);
+  color: white;
+}
+
+.THIS .statusColorOrange { 
+  background-color : Orange;
+  color: black;
+}
+
+.THIS .statusColorGreen { 
+  background-color : rgb(13, 95, 13);
+  color: white;
+}
+
+.THIS .statusColorBlue { 
+  background-color : rgb(4, 140, 194);
+  color: black;
+}
+
+.THIS .statusColorGray { 
+  background-color : rgb(206, 204, 204);
+  color: black;
+}
+
+.THIS .statusColorBlue { 
+  background-color : rgb(1, 118, 211);
+  color: white;
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Membership_Payments_12309</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Lead__c</columns>
+    <columns>Order__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>Status__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Settle_date__c</field>
+        <operation>equals</operation>
+        <value>2/1/2024 12:00 AM</value>
+    </filters>
+    <label>Membership Payments</label>
+</ListView>

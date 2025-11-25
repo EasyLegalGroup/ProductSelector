@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Compact_Layout_2_0</fullName>
+    <fields>Status__c</fields>
+    <fields>Subscription_status__c</fields>
+    <fields>Account__c</fields>
+    <fields>Campaign__c</fields>
+    <fields>Amount__c</fields>
+    <fields>Refunded_Amount__c</fields>
+    <fields>Fixed_discount_Type__c</fields>
+    <label>Compact Layout 2.0</label>
+</CompactLayout>

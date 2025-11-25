@@ -1,0 +1,139 @@
+<aura:component controller="PS_PaymentController" implements="flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" access="global">
+  <aura:attribute name="recordId" type="String" access="global"/>
+  <aura:attribute name="sObjectName" type="String" access="global" />
+  <aura:attribute name="statusClasses" type="String" access="global"/>
+  <aura:attribute name="subscription" type="Object" default="{}" access="global"/>
+  <aura:attribute name="payments" type="Payments__c" default="[]" access="global"/>
+  <aura:attribute name="isPaymentRecordPresnt" type="Boolean" default="false" access="global"/>
+  <aura:attribute name="showCreatePaymentButton" type="Boolean" default="true" access="global"/>
+  <aura:attribute name="showSpinner" type="Boolean" default="false" access="global"/>
+  <aura:attribute name="currentUserId" type="String" />
+  <aura:attribute name="logEnabledUserIds" type="String" />
+  <!-- DIN-344 changes -->
+  <!-- Start -->
+  <aura:attribute name="isCancelConfirmationModalOpen" type="Boolean" default="false" access="global"/>
+
+  <!-- <aura:attribute name="recordIdToCancel" type="String" access="global" /> -->
+  <!-- End -->
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+  <aura:handler name="destroy" value="{!this}" action="{!c.handleDestroy}" />
+
+  <lightning:empApi aura:id="empApi" access="global" />
+  
+  <lightning:messageChannel  type="payment_Status__c" aura:id="sampleMessageChannel" scope="APPLICATION"/>
+  
+  <div>
+    <aura:if isTrue="{!v.showSpinner}">
+      <lightning:spinner alternativeText="Loading" />
+    </aura:if>
+    <div class="slds-card slds-p-around_medium ">
+      
+      <fieldset class="slds-box">
+        <legend class="slds-text-heading_medium">Payment Status</legend>
+        <div class="slds-float_right">
+          
+          <lightning:buttonIcon iconName="utility:refresh"  alternativeText="refresh" title="refresh" onclick="{!c.refreshPaymentStatus}"></lightning:buttonIcon>
+        </div>  
+        <aura:if isTrue="{!!v.showCreatePaymentButton}">
+          <aura:iteration items="{!v.payments}" var="payment">
+              <div class="slds-text-title_bold slds-text-heading_small">
+                Billing Information
+              </div>
+              <div class="slds-p-top_xx-small slds-text-heading_small"> {!payment.Billing_name__c} </div>
+              <div class="slds-p-top_xx-small slds-text-heading_small"> {!payment.BillingStreet__c} </div>
+              <div class="slds-p-top_xx-small slds-text-heading_small"> {!payment.Billing_PostalCode__c} &nbsp; {!payment.BillingCity__c} </div>
+              <div class="slds-text-title_bold slds-p-top_small slds-text-heading_small">
+                Subscription Information
+              </div>
+              <div class="slds-p-top_xx-small slds-text-heading_small"> Subscription status:  
+                <aura:if isTrue="{!payment.Subscription_status__c == 'Accepted'}"> 
+                  <span class="slds-text-title_bold slds-text-color_success"> {!payment.Subscription_status__c} </span>
+                  <aura:set attribute="else"> 
+                    <span class="slds-text-title_bold"> {!payment.Subscription_status__c} </span>
+                  </aura:set> 
+                </aura:if> 
+              </div>
+              <aura:if isTrue="{!v.sObjectName != 'Order'}">
+                <aura:if isTrue="{!payment.Subscription_status__c != 'Accepted'}">
+                  <div class="slds-p-top_xx-small slds-text-heading_small slds-wrap"> <lightning:formattedUrl value="{!payment.Subscription_link__c}" label="Subscription acceptation link" target="_blank" /> </div>
+                </aura:if>
+              </aura:if>
+              <div class="slds-text-title_bold slds-p-top_small slds-text-heading_small">
+                  Order value: <lightning:formattedNumber value="{!payment.Amount__c}" style="currency" currencyCode="{!payment.CurrencyIsoCode}" currencyDisplayAs="symbol" /> </div>
+              <!--DIN-330 Changes-->
+              <!--Start-->
+
+              <!-- DFJ-319 changes start  -->
+              <aura:if isTrue="{!payment.Status__c !='Settled'}">
+              <div class="slds-p-top_xx-small slds-text-heading_small slds-wrap"> <lightning:formattedUrl value="{!payment.Payment_link__c}" label="Payment link" target="_blank" />
+
+              </div>
+                  <div class="slds-p-top_small">
+                      <c:dfj_OfflineManualSettlePayment invoiceUniqueHandle="{!payment.Id}" subscriptionStatus="{!payment.Subscription_status__c}"/>
+                  </div>
+                  <!--  DFJ-319 changes end -->
+              </aura:if>
+              <!--End-->
+              <!--DFJ-118 Changes Start-->
+              <aura:if isTrue="{!v.sObjectName == 'Order'}">
+              <aura:if isTrue="{!empty(payment.Payment_link__c)}">
+              <div class="slds-p-top_xx-small slds-text-heading_small slds-wrap"> <lightning:formattedUrl value="{!payment.Subscription_link__c}" label="Subscription link" target="_blank" /> </div>
+                </aura:if>
+              </aura:if>
+              <!--End-->
+              <div class="{!payment.statusClass}"> {!payment.Status__c} </div>
+              <!-- DIN-344 changes -->
+              <!-- Start -->
+              <div class="slds-p-top_xx-small slds-float_right">
+                <aura:if isTrue="{!!v.showCreatePaymentButton}"> 
+                  <lightning:button variant="brand" label="Cancel payment" iconName="utility:close" iconPosition="left" onclick="{!c.cancelInvoiceSubscription}" />
+                </aura:if>
+                <!-- <lightning:buttonIcon iconName="utility:cancel" variant="brand" alternativeText="Settings" title="cancel payments" onclick="{!c.cancelInvoiceSubscription}"/> -->
+              </div>
+              <!-- End -->
+          </aura:iteration>
+        </aura:if>
+        <aura:if isTrue="{!v.showCreatePaymentButton}">
+          <div class="slds-align_absolute-center">
+            <div class="slds-p-top_xx-small slds-text-heading_small"> Status: Payment not created</div>
+          </div>
+          <div class="slds-align_absolute-center"> 
+            <div class="slds-p-top_xx-small">
+              <!--
+               <c:PS_CreatePayment showCreatePaymentButton="{!v.showCreatePaymentButton}" recordId="{!v.recordId}" disableButton="{!v.sObjectName == 'Lead'}" />
+              -->
+    
+              <c:pS_EnhancedCreatePayment  showCreatePaymentButton="{!v.showCreatePaymentButton}" disableButton="{!v.sObjectName == 'Lead'}" recordId="{!v.recordId}" objectApiName="{!v.sObjectName}"></c:pS_EnhancedCreatePayment>
+            </div>
+          </div>
+        </aura:if>
+      </fieldset>
+    </div>
+  </div>
+  <aura:if isTrue="{!v.isCancelConfirmationModalOpen}">
+            
+
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+              <div class="slds-modal__container">
+                <!-- <lightning:buttonIcon iconName="utility:close" onclick="{!c.closeModal}" alternativeText="close" variant="bare-inverse" class="slds-modal__close" /> -->
+                <div class="slds-modal__content slds-p-around_small" id="modal-content-id-1">
+                    <lightning:layout multipleRows="true">
+                        <lightning:layoutItem size="12" largeDeviceSize="12" mediumDeviceSize="12" smallDeviceSize="12">
+                            <div class="slds-align_absolute-center slds-text-heading_medium slds-p-around_medium">
+                                <p>Are you sure you want to cancel this payment ?</p>
+                            </div>
+                        </lightning:layoutItem>
+                        <div align="right" class="slds-p-around_medium slds-align_absolute-center">
+                          <lightning:button variant="brand" label="Yes" name="deleteButton" onclick="{! c.cancelPaymentWhenButtonClicked}" />
+                          <lightning:button variant="neutral" label="No" onclick="{! c.closeCancelModal }" />
+                        </div>
+  
+                    </lightning:layout>
+                </div>
+  
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+</aura:component>

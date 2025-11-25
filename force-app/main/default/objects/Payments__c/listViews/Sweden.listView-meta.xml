@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sweden</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>Refunded_Amount__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Lead__c</columns>
+    <columns>Order__c</columns>
+    <columns>Status__c</columns>
+    <columns>Subscription_status__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>Payment_link__c</columns>
+    <columns>Subscription_link__c</columns>
+    <columns>OWNER.FIRST_NAME</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CURRENCY_ISO_CODE</field>
+        <operation>equals</operation>
+        <value>SEK</value>
+    </filters>
+    <label>Sweden</label>
+</ListView>

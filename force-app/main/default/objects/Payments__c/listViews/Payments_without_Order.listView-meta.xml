@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Payments_without_Order</fullName>
+    <columns>NAME</columns>
+    <columns>Amount__c</columns>
+    <columns>Refunded_Amount__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Account__c</columns>
+    <columns>Lead__c</columns>
+    <columns>Order__c</columns>
+    <columns>Status__c</columns>
+    <columns>Subscription_status__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>Payment_link__c</columns>
+    <columns>Subscription_link__c</columns>
+    <columns>OWNER.FIRST_NAME</columns>
+    <columns>Type__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Order__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Settled</value>
+    </filters>
+    <label>Payments without Order</label>
+</ListView>

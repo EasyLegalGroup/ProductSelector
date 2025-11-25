@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Subscription_status__c</fullName>
+    <label>Subscription status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Subscription Created</fullName>
+                <default>false</default>
+                <label>Subscription Created</label>
+            </value>
+            <value>
+                <fullName>Subscription Approved</fullName>
+                <default>false</default>
+                <label>Subscription Approved</label>
+            </value>
+            <value>
+                <fullName>Accepted</fullName>
+                <default>false</default>
+                <label>Accepted</label>
+            </value>
+            <value>
+                <fullName>No subscription included</fullName>
+                <default>false</default>
+                <label>No subscription included</label>
+            </value>
+            <value>
+                <fullName>Subscription included</fullName>
+                <default>false</default>
+                <label>Subscription included</label>
+            </value>
+            <value>
+                <fullName>Activated</fullName>
+                <default>false</default>
+                <label>Activated</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
