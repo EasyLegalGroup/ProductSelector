@@ -42,6 +42,7 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     @track isShowDiscountCodeModal = false;
     @track isProductListDelete;
     @track isOpportunityObjectType = false;//Added by Kajal at 11.11
+    @track isPaymentInProgress = false;
     isPaymentCreated = false;
     priceBookOptionsForCombobox = [];
     selectedPriceBookIdUsingCombobox;
@@ -134,12 +135,7 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         getPaymentRecords({recordId: this.recordId}).then((data)=>{
            console.log('--product payment fetched inside method--');
             const hasPayments = Array.isArray(data?.paymentList) && data.paymentList.length > 0;
-            if(hasPayments){
-                console.log('payment present, locking discount and create payment button');
-                this.isAddDiscount = false;
-            } else {
-                this.isAddDiscount = true;
-            }
+            this.isAddDiscount = !hasPayments;
             this.isPaymentCreated = hasPayments;
         }).catch((error)=>{
              console.error('Error fetching payment record--> ' + error);
@@ -185,12 +181,27 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     handlePaymentFound(event) {
         console.log('Payment found notification received');
         this.isPaymentCreated = true;
+        this.isAddDiscount = false;
         this.disableButton = true;
     }
 
     handlePaymentMissing() {
         console.log('Payment missing notification received');
         this.isPaymentCreated = false;
+        this.isAddDiscount = true;
+    }
+
+    handlePaymentProgress(event){
+        const status = event.detail?.status;
+        if(status === 'start'){
+            this.isPaymentInProgress = true;
+        } else if(status === 'end'){
+            this.isPaymentInProgress = false;
+        }
+    }
+
+    get isActionButtonsDisabled(){
+        return this.isPaymentCreated || this.isPaymentInProgress;
     }
 
 //change kajal 
@@ -493,6 +504,11 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                         }
                     }
                 });
+            }
+            // No quantities selected; exit gracefully
+            if (!finalProductsList.length) {
+                this.isLoadedSpinner = false;
+                return;
             }
             if(this.productLineItems && this.productLineItems.length){
                 this.selectedPriceBookName = this.fullProductData.find(ele => ele.pb2.Id === this.productLineItems[0].Pricebook_Id__c)?.pb2.Name;

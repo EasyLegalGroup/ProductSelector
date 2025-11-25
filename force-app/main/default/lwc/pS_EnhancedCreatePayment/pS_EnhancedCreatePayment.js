@@ -179,6 +179,7 @@ changeQuantityOnAccount_helper() {
 
 handleProceedPaymentOnAccount(){
     try{
+        this.dispatchPaymentProgress('start');
         let orderItemsList =  this.orderProducts;
       
         const updatedOrderItemsList = orderItemsList.map((obj) => {
@@ -195,16 +196,18 @@ handleProceedPaymentOnAccount(){
                  this.calloutChangesHandler();
                  this.ShowToastEvent(result.successMessage,'Success');
             }else{
-                this.ShowToastEvent(result && result.errorMessage ? result.errorMessage : 'Something went wrong','Error');
-            }
-            this.disableOkButton = false;
-            this.buttonLabelOnOrder = 'Ok';
-            this.openConfirmationModelOnLead = false;
-            this.openConfirmationModelOnOrder = false;
+            this.ShowToastEvent(result && result.errorMessage ? result.errorMessage : 'Something went wrong','Error');
+        }
+        this.disableOkButton = false;
+        this.buttonLabelOnOrder = 'Ok';
+        this.openConfirmationModelOnLead = false;
+        this.openConfirmationModelOnOrder = false;
+        this.dispatchPaymentProgress('end');
            
          }) 
     } catch (error) {
         console.error(error);
+        this.dispatchPaymentProgress('end');
     }
 }
 //End
@@ -295,6 +298,7 @@ getAddressInfoFromLeadOROrder_helper(){
 
     handleProceedPayment(){
         try{
+         this.dispatchPaymentProgress('start');
          createPaymentRecord({recordId : this.recordId}).then(result=>{
                 if(result && result.successMessage && !result.errorMessage){
                     this.payment = result.payment;
@@ -311,10 +315,12 @@ getAddressInfoFromLeadOROrder_helper(){
                 this.buttonLabelOnOrder = 'Ok';
                 this.openConfirmationModelOnLead = false;
                 this.openConfirmationModelOnOrder = false;
+                this.dispatchPaymentProgress('end');
                
             }) 
         } catch (error) {
             console.error(error);
+            this.dispatchPaymentProgress('end');
         }
     }
 
@@ -326,11 +332,12 @@ getAddressInfoFromLeadOROrder_helper(){
     }
     
    handleCallouts_helper(){
-    let payment = this.payment;
+   let payment = this.payment;
     let paymentOrderLines = this.paymentOrderLines;
     let subscriptionLeadProducts = this.subscriptionLeadProducts.length <= 0 ? this.subscriptionOrderItemProducts : this.subscriptionLeadProducts;
     this.buttonLabelOnOrder = 'Running...';
     this.disableOkButton = true;
+    this.dispatchPaymentProgress('start');
      
     makeCalloutToCreateCustomerInvoice({recordId : this.recordId, 
         payment : JSON.stringify(payment), 
@@ -369,9 +376,11 @@ getAddressInfoFromLeadOROrder_helper(){
         this.buttonLabelOnOrder = 'Ok';
         this.openConfirmationModelOnLead = false;
         this.openConfirmationModelOnOrder = false;
+        this.dispatchPaymentProgress('end');
         
     } catch (error) {
         console.error(error);
+        this.dispatchPaymentProgress('end');
     }
 })
 }
@@ -407,6 +416,14 @@ if(result){
             duration : 5000
         });
         this.dispatchEvent(evt);
+    }
+
+    dispatchPaymentProgress(status) {
+        this.dispatchEvent(new CustomEvent('paymentprogress', {
+            detail: { status },
+            bubbles: true,
+            composed: true
+        }));
     }
 
     changeQuantity_helper(event) {

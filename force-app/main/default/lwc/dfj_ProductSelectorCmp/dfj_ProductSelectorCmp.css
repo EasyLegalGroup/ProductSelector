@@ -142,7 +142,7 @@ svg {
   --base: 30%;
 }
 
-button:is(:hover, :focus-visible) path {
+.spark-button:is(:hover, :focus-visible) path {
   animation-name: bounce;
 }
 
@@ -153,7 +153,7 @@ button:is(:hover, :focus-visible) path {
   }
 }
 
-button:before {
+.spark-button:before {
   content: "";
   position: absolute;
   inset: -0.25em;
@@ -179,9 +179,38 @@ button:before {
    margin-left: 8px;
 }
 
-button svg {
+.spark-button svg {
   inline-size: 1.25em;
   translate: -200% 0%;
+}
+
+/* Ensure consistent button widths and spacing */
+lightning-layout-item .fixed-button,
+lightning-layout-item .spark-button {
+  width: 100%;
+}
+
+lightning-layout-item {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+.spark-button:disabled {
+  --active: 0;
+  background: #f3f2f2;
+  color: #8c8c8c;
+  box-shadow: none;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.spark-button:disabled:before {
+  display: none;
+}
+
+.spark-button:disabled .sparkle path {
+  animation: none;
+  color: #b0b0b0;
 }
 
 @media screen and (min-width: 1366px) and (max-width: 1536px) and (min-height: 700px) and (max-height: 900px) {
@@ -221,6 +250,10 @@ button svg {
     --slds-c-input-spacing-horizontal-end: 0;
 }
 
+.discount-input .slds-input {
+    padding-left: 0.5rem;
+}
+
 .success-indicator {
     display: flex !important;
     align-items: center;
@@ -228,7 +261,56 @@ button svg {
 }
 
 .fade-success {
-    transition: background-color 0.5s ease;
     background-color: #02da4e !important; /* Green color */
     color: white !important;
+    animation: successFade 1.4s ease;
+}
+
+@keyframes successFade {
+    0% { opacity: 0; transform: scale(0.96); }
+    30% { opacity: 1; transform: scale(1); }
+    70% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1); }
+}
+
+.payment-selector-wrapper {
+  position: relative;
+}
+
+.spark-button:disabled {
+  --active: 0;
+  background: #f3f2f2;
+  color: #8c8c8c;
+  box-shadow: none;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+.spark-button:disabled:before {
+  display: none;
+}
+
+.spark-button:disabled .sparkle path {
+  animation: none;
+  color: #b0b0b0;
+}
+
+.payment-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  z-index: 5;
+}
+
+.overlay-text {
+  font-weight: 600;
+  color: #1b1b1b;
+}
+
+.button-gap {
+  margin-left: 0.5rem;
 }

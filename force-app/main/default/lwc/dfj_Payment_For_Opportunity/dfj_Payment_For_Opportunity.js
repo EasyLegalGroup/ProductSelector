@@ -443,7 +443,7 @@ export default class Dfj_Payment_For_Opportunity extends LightningElement {
     // handle creation of payment record
     async handleCreationOfPaymentRecord() {
         try {
-
+            this.dispatchPaymentProgress('start');
             createPaymentRecord({recordId: this.recordId}).then(result => {
 
                 if (result.successMessage) {
@@ -456,13 +456,16 @@ export default class Dfj_Payment_For_Opportunity extends LightningElement {
                     this.handleCalloutToCreateCustomerRecordAndInvoiceCreation();
                 } else {
                     this.ShowErrorToastEvent(result && result.errorMessage ? result.errorMessage : 'Something went wrong', 'Error');
+                    this.dispatchPaymentProgress('end');
                 }
             }).catch((e) => {
                 console.log("🚀️ Error in ~ DFJ_PaymentCreatorForOpportunity ~ handleCreationOfPayment() ~ apex method createPaymentRecord :", JSON.stringify(e.body ? e.body.message : e));
+                this.dispatchPaymentProgress('end');
             })
 
         } catch (e) {
             console.log("🚀️ Error in ~ DFJ_PaymentCreatorForOpportunity ~ handleCreationOfPayment() :", JSON.stringify(e.message));
+            this.dispatchPaymentProgress('end');
         }
     }
 
@@ -511,10 +514,12 @@ export default class Dfj_Payment_For_Opportunity extends LightningElement {
 
 
             }
+            this.dispatchPaymentProgress('end');
 
 
         } catch (e) {
             console.log("🚀️ Error in ~ DFJ_PaymentCreatorForOpportunity ~ handleCalloutToCreateCustomerRecordAndInvoiceCreation() :", JSON.stringify(e.message));
+            this.dispatchPaymentProgress('end');
         }
     }
 
@@ -575,4 +580,11 @@ export default class Dfj_Payment_For_Opportunity extends LightningElement {
 
     @api hideCreatePaymentButton = false;
 
+    dispatchPaymentProgress(status) {
+        this.dispatchEvent(new CustomEvent('paymentprogress', {
+            detail: { status },
+            bubbles: true,
+            composed: true
+        }));
+    }
 }

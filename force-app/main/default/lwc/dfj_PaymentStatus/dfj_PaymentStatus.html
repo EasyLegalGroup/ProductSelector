@@ -1,9 +1,4 @@
 <template>
-    <!-- Spinner -->
-    <template if:true={showSpinner}>
-        <lightning-spinner alternative-text="Loading"></lightning-spinner>
-    </template>
-    
     <div>
         <!-- Payment Link and Status Row -->
         <lightning-layout multiple-rows="true" vertical-align="center" class="slds-gutters">
@@ -14,35 +9,51 @@
                 small-device-size="12" 
                 class="slds-m-top_small">
                 
-                <div class="slds-grid slds-grid_vertical-align-center">
+                <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-wrap">
                     
                     <!-- Split Button for Payment Link and Actions -->
-                    <template if:false={isPaymentLinkDisabled}>
-                        <div class="slds-m-right_small">
+                    <template if:true={isPaymentRecordPresent}>
+                        <div class="slds-m-right_small slds-button-group" role="group">
                             <lightning-button 
                                 label="Open Payment Link" 
                                 icon-name="utility:new_window"
                                 icon-position="right"
-                                onclick={handlePaymentLinkClick}>
+                                onclick={handlePaymentLinkClick}
+                                disabled={isPaymentLinkDisabled}>
                             </lightning-button>
+                            <lightning-button-menu
+                                alternative-text="More payment actions"
+                                icon-name="utility:chevrondown"
+                                menu-alignment="left"
+                                onselect={handleMenuSelect}
+                                disabled={isActionMenuDisabled}>
+                                <lightning-menu-item value="banktransfer" label="Bank transfer" disabled={isSettledStatus}></lightning-menu-item>
+                                <lightning-menu-item value="cancelpayment" label="Cancel payment" disabled={isSettledStatus}></lightning-menu-item>
+                            </lightning-button-menu>
                         </div>
                     </template>
 
-                    <!-- Status Pill -->
-                    <span class={statusClass}>
-                        {status}
-                    </span>
-                    
-                    <!-- Refresh Button -->
-                    <div class={refreshButtonClass} onclick={refreshPaymentData} title="Refresh Status">
-                        <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
-                    </div>
+                    <div class="status-block">
+                        <!-- Status Pill -->
+                        <span class={statusClass}>
+                            {status}
+                        </span>
+                        <template if:true={showSubscriptionPill}>
+                            <span class="subscription-pill slds-m-left_x-small">Subscription included</span>
+                        </template>
 
-                    <template if:false={isPaymentLinkDisabled}>
-                         <div class="slds-m-left_small">
-                            <lightning-helptext content={moreInfoContent} icon-name="utility:info"></lightning-helptext>
-                         </div>
-                    </template>
+                        <!-- Refresh Button -->
+                        <div class="slds-grid slds-grid_vertical-align-center slds-m-top_x-small">
+                            <div class={refreshButtonClass} onclick={refreshPaymentData} title="Refresh Status">
+                                <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
+                            </div>
+                            <template if:true={countdownLabel}>
+                                <div class="slds-m-left_x-small slds-text-title_caps slds-text-color_weak" style="font-size:0.7rem;">
+                                    {countdownLabel}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
 
                 </div>
             </lightning-layout-item>

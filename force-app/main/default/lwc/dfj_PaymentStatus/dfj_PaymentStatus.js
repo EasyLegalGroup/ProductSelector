@@ -18,6 +18,7 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
     @track isdeleteConfirmationModal = false;
     @track isCancelling = false;
     @track isOpenOfflineManualSettleModal = false;
+    @track autoRefreshCountdown = 0;
     commentRelatedToManualSettle;
     referenceInputRelatedToManualSettle;
     defaultValueOfMethodForManualSettle = "bank_transfer";
@@ -33,6 +34,10 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         this.wiredResult = result;
         const { data, error } = result;
         if (data) {
+            if (data.errorMessage) {
+                console.error('Payment data error:', data.errorMessage);
+                this.showToast('Error', data.errorMessage, 'error');
+            }
             console.log('Payment data received:', JSON.stringify(data));
             console.log('Object API Name:', this.objectApiName);
             this.payments = data.paymentList ? [...data.paymentList] : [];
@@ -52,6 +57,7 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
             } else {
                 this.dispatchEvent(new CustomEvent('paymentmissing'));
             }
+            this.updateAutoRefresh();
         } else if (error) {
             console.error('Error fetching payment data:', error);
             this.error = error.body ? error.body.message : 'Unknown error';
@@ -67,22 +73,29 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         return this.isPaymentRecordPresent ? 'refresh-button-container' : 'refresh-button-container disabled-refresh';
     }
 
+    get countdownLabel() {
+        return this.autoRefreshCountdown > 0 ? `Auto-refresh in ${this.autoRefreshCountdown}s` : '';
+    }
+
     @api
-    refreshPaymentData() {
-        if (!this.isPaymentRecordPresent) {
-            return;
-        }
+    refreshPaymentData(showSpinner = false) {
         console.log('Refreshing payment data...');
-        this.showSpinner = true;
+        if (showSpinner) {
+            this.showSpinner = true;
+        }
         
         return refreshApex(this.wiredResult)
             .then(() => {
                 console.log('Payment data refreshed successfully');
-                this.showSpinner = false;
+                if (showSpinner) {
+                    this.showSpinner = false;
+                }
             })
             .catch(error => {
                 console.error('Error refreshing payment data:', error);
-                this.showSpinner = false;
+                if (showSpinner) {
+                    this.showSpinner = false;
+                }
             });
     }
 
@@ -107,6 +120,14 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         return this.payments.length > 0 ? this.payments[0].Payment_link__c : '';
     }
 
+    get isActionMenuDisabled() {
+        return !this.isPaymentRecordPresent;
+    }
+
+    get showSubscriptionPill() {
+        return this.isPaymentRecordPresent && this.isSubscriptionIncluded === 'Yes';
+    }
+
     get status() {
         return this.payments.length > 0 ? this.payments[0].Status__c : 'No payment created';
     }
@@ -122,6 +143,16 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         } else {
             return 'status-pill slds-theme_warning'; // Pending
         }
+    }
+
+    get isSettledStatus() {
+        const status = this.status ? this.status.toLowerCase() : '';
+        return status.includes('succeeded') ||
+            status.includes('success') ||
+            status.includes('settled') ||
+            status.includes('paid') ||
+            status.includes('completed') ||
+            status.includes('captured');
     }
 
     // get statusVariant() {
@@ -158,13 +189,12 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
     get moreInfoContent() {
         if (this.payments.length === 0) return 'No payment details available.';
         
-        const customer = this.customerName;
-        const price = this.totalPrice; // This is raw number, formatting in JS is hard without Intl
-        const currency = this.currencyCode;
-        const sub = this.isSubscriptionIncluded;
-
-        // Simple formatting with newlines
-        return `Customer: ${customer}\nTotal: ${price} ${currency}\nSubscription: ${sub}`;
+        const lines = [
+            `Customer: ${this.customerName}`,
+            `Total: ${this.totalPrice} ${this.currencyCode}`,
+            `Subscription: ${this.isSubscriptionIncluded}`
+        ];
+        return lines.join('\n');
     }
 
     get iconName() {
@@ -253,6 +283,56 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
     handleConfirmButtonClickForManualSettle(){
         this.callApexMethodForOfflineManualSettleOfPayment();
         this.isOpenOfflineManualSettleModal = false;
+    }
+
+    handleMenuSelect(event) {
+        const action = event.detail.value;
+        if (action === 'banktransfer') {
+            this.handleBankTransfer();
+        } else if (action === 'cancelpayment') {
+            this.handleDeleteButton();
+        }
+    }
+
+    startAutoRefresh() {
+        if (this._countdownInterval) {
+            return;
+        }
+        this.autoRefreshCountdown = 10;
+        this._countdownInterval = setInterval(() => {
+            const isPending = (this.status || '').toLowerCase().includes('pending');
+            if (!isPending) {
+                this.stopAutoRefresh();
+                return;
+            }
+            if (this.autoRefreshCountdown > 1) {
+                this.autoRefreshCountdown -= 1;
+            } else {
+                this.autoRefreshCountdown = 10;
+                this.refreshPaymentData(false);
+            }
+        }, 1000);
+    }
+
+    stopAutoRefresh() {
+        if (this._countdownInterval) {
+            clearInterval(this._countdownInterval);
+            this._countdownInterval = null;
+        }
+        this.autoRefreshCountdown = 0;
+    }
+
+    updateAutoRefresh() {
+        const isPending = (this.status || '').toLowerCase().includes('pending');
+        if (isPending) {
+            this.startAutoRefresh();
+        } else {
+            this.stopAutoRefresh();
+        }
+    }
+
+    disconnectedCallback() {
+        this.stopAutoRefresh();
     }
 
     callApexMethodForOfflineManualSettleOfPayment(){
