@@ -4,9 +4,9 @@
         <lightning-spinner alternative-text="Loading"></lightning-spinner>
     </template>
     
-    <div class="status-grid slds-m-top_small">
-        <div class="cell action-cell">
-            <template if:true={showPaymentActions}>
+    <div class={statusGridClass}>
+        <template if:true={showPaymentActions}>
+            <div class="cell action-cell">
                 <lightning-button-group>
                     <lightning-button 
                         label="Open Payment Link" 
@@ -24,8 +24,8 @@
                         <lightning-menu-item value="bank_transfer" label="Bank Transfer"></lightning-menu-item>
                     </lightning-button-menu>
                 </lightning-button-group>
-            </template>
-        </div>
+            </div>
+        </template>
 
         <div class="cell status-cell">
             <span class={statusClass}>
@@ -33,14 +33,14 @@
             </span>
         </div>
 
-        <div class="cell subscription-cell">
-            <template if:true={showSubscriptionPill}>
+        <template if:true={showSubscriptionPill}>
+            <div class="cell subscription-cell">
                 <span class="subscription-pill">Subscription included</span>
-            </template>
-        </div>
+            </div>
+        </template>
 
-        <div class="cell refresh-cell">
-            <template if:true={showRefreshControls}>
+        <template if:true={showRefreshControls}>
+            <div class="cell refresh-cell">
                 <div class="refresh-row">
                     <div class={refreshButtonClass} onclick={handleRefreshClick} title="Refresh Status">
                         <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
@@ -49,11 +49,9 @@
                         <div class="countdown-label">{countdownLabel}</div>
                     </template>
                 </div>
-            </template>
-        </div>
+            </div>
+        </template>
     </div>
-
-    <br />
 
     <!-- Accordion for more info removed -->
     <!-- <template if:false={isPaymentLinkDisabled}>
@@ -96,9 +94,15 @@
                                 </div>
                             </lightning-layout-item>
                             <div align="right" class="slds-p-around_medium slds-align_absolute-center">
-                                <lightning-button variant="neutral" label="No" onclick={handleCloseModal} class="slds-m-right_small"></lightning-button>
+                                <lightning-button variant="neutral" label="No" onclick={handleCloseModal} class="slds-m-right_small" disabled={isCancelling}></lightning-button>
                                 <lightning-button variant="brand" label="Cancel Payment" onclick={handleCancelPayment} disabled={isCancelling}></lightning-button>
                             </div>
+                            <template if:true={isCancelling}>
+                                <div class="cancel-progress">
+                                    <lightning-spinner alternative-text="Cancelling payment" size="small"></lightning-spinner>
+                                    <span class="cancel-progress__text">Cancelling payment...</span>
+                                </div>
+                            </template>
                         </lightning-layout>
                     </div>
                 </div>
