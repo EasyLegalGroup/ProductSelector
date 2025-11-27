@@ -47,11 +47,14 @@
     justify-content: center;
     padding: 0 0.75rem;
     height: 2rem;
+    min-height: 2rem;
+    line-height: 1.2rem;
     border-radius: 999px;
     color: white;
     font-weight: 600;
     font-size: 0.85rem;
     white-space: nowrap;
+    transition: none;
 }
 
 .status-inactive {
@@ -104,14 +107,63 @@
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
   height: 1.5rem;
+  min-height: 1.5rem;
+  line-height: 1.2rem;
   display: inline-flex;
   align-items: center;
   font-weight: 600;
   font-size: 0.7rem;
+  transition: none;
 }
 
-.status-block {
+.actions-block {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 0.25rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-auto-rows: auto;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.cell {
+  min-height: 2rem;
+}
+
+.action-cell,
+.subscription-cell {
+  display: flex;
+  align-items: center;
+}
+
+.status-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.refresh-cell {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.refresh-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countdown-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #706e6b;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  min-width: 9.5rem;
 }

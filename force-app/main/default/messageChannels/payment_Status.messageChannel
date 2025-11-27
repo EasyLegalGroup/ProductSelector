@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>This Lightning Message Channel sends information from Aura to LWC</description>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
+        <fieldName>messageToSend</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <description>Used for disable create payment button</description>
+        <fieldName>disableButton</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>sourceSystem</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>recordId</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>leadId</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>orderId</fieldName>
+    </lightningMessageFields>
+    <masterLabel>Payment Status</masterLabel>
+</LightningMessageChannel>

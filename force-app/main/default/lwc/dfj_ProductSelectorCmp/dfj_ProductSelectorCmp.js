@@ -175,7 +175,7 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     
     const paymentStatusCmp = this.template.querySelector('c-dfj_-payment-status');
     if (paymentStatusCmp) {
-      paymentStatusCmp.refreshPaymentData();    }
+      paymentStatusCmp.refreshPaymentData(true, true);    }
 }
 
     handlePaymentFound(event) {
@@ -754,7 +754,8 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         // this.isShowDiscountModal = true; // Old logic
         this.isDiscountInputVisible = true; // New logic
         this.disableButton= true; // kajal
-        this.discountAmount = null; // Clear the input value
+        // Pre-fill with existing fixed discount; ensure 0 fallback
+        this.discountAmount = this.fixedDiscountAmount ?? 0;
         console.log('fixedDiscountAmount-->',this.fixedDiscountAmount);
         // Focus logic can be handled in renderedCallback if needed, or just rely on autofocus
         setTimeout(() => {

@@ -1,64 +1,56 @@
 <template>
-    <div>
-        <!-- Payment Link and Status Row -->
-        <lightning-layout multiple-rows="true" vertical-align="center" class="slds-gutters">
-            <lightning-layout-item 
-                size="12" 
-                large-device-size="12" 
-                medium-device-size="12" 
-                small-device-size="12" 
-                class="slds-m-top_small">
-                
-                <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-wrap">
-                    
-                    <!-- Split Button for Payment Link and Actions -->
-                    <template if:true={isPaymentRecordPresent}>
-                        <div class="slds-m-right_small slds-button-group" role="group">
-                            <lightning-button 
-                                label="Open Payment Link" 
-                                icon-name="utility:new_window"
-                                icon-position="right"
-                                onclick={handlePaymentLinkClick}
-                                disabled={isPaymentLinkDisabled}>
-                            </lightning-button>
-                            <lightning-button-menu
-                                alternative-text="More payment actions"
-                                icon-name="utility:chevrondown"
-                                menu-alignment="left"
-                                onselect={handleMenuSelect}
-                                disabled={isActionMenuDisabled}>
-                                <lightning-menu-item value="banktransfer" label="Bank transfer" disabled={isSettledStatus}></lightning-menu-item>
-                                <lightning-menu-item value="cancelpayment" label="Cancel payment" disabled={isSettledStatus}></lightning-menu-item>
-                            </lightning-button-menu>
-                        </div>
-                    </template>
+    <!-- Spinner -->
+    <template if:true={showSpinner}>
+        <lightning-spinner alternative-text="Loading"></lightning-spinner>
+    </template>
+    
+    <div class="status-grid slds-m-top_small">
+        <div class="cell action-cell">
+            <template if:true={showPaymentActions}>
+                <lightning-button-group>
+                    <lightning-button 
+                        label="Open Payment Link" 
+                        icon-name="utility:new_window"
+                        icon-position="right"
+                        onclick={handlePaymentLinkClick}
+                        disabled={isPaymentLinkDisabled}>
+                    </lightning-button>
+                    <lightning-button-menu 
+                        alternative-text="More payment actions"
+                        onselect={handleMenuSelect}
+                        variant="border-filled"
+                        disabled={isPaymentActionsDisabled}>
+                        <lightning-menu-item value="cancel" label="Cancel Payment"></lightning-menu-item>
+                        <lightning-menu-item value="bank_transfer" label="Bank Transfer"></lightning-menu-item>
+                    </lightning-button-menu>
+                </lightning-button-group>
+            </template>
+        </div>
 
-                    <div class="status-block">
-                        <!-- Status Pill -->
-                        <span class={statusClass}>
-                            {status}
-                        </span>
-                        <template if:true={showSubscriptionPill}>
-                            <span class="subscription-pill slds-m-left_x-small">Subscription included</span>
-                        </template>
+        <div class="cell status-cell">
+            <span class={statusClass}>
+                {status}
+            </span>
+        </div>
 
-                        <!-- Refresh Button -->
-                        <div class="slds-grid slds-grid_vertical-align-center slds-m-top_x-small">
-                            <div class={refreshButtonClass} onclick={refreshPaymentData} title="Refresh Status">
-                                <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
-                            </div>
-                            <template if:true={countdownLabel}>
-                                <div class="slds-m-left_x-small slds-text-title_caps slds-text-color_weak" style="font-size:0.7rem;">
-                                    {countdownLabel}
-                                </div>
-                            </template>
-                        </div>
+        <div class="cell subscription-cell">
+            <template if:true={showSubscriptionPill}>
+                <span class="subscription-pill">Subscription included</span>
+            </template>
+        </div>
+
+        <div class="cell refresh-cell">
+            <template if:true={showRefreshControls}>
+                <div class="refresh-row">
+                    <div class={refreshButtonClass} onclick={handleRefreshClick} title="Refresh Status">
+                        <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
                     </div>
-
+                    <template if:true={countdownLabel}>
+                        <div class="countdown-label">{countdownLabel}</div>
+                    </template>
                 </div>
-            </lightning-layout-item>
-        </lightning-layout>
-
+            </template>
+        </div>
     </div>
 
     <br />
