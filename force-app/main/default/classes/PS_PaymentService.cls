@@ -291,7 +291,7 @@ public with sharing class PS_PaymentService {
 
             paymentRecord.BillingCity__c = accountRelatedToOpportunity[0].BillingCity;
 
-            paymentRecord.BillingCountry__c = (accountRelatedToOpportunity[0].Market_Unit__c.equals('DFJ_DK') || accountRelatedToOpportunity[0].Market_Unit__c.equals('Testamente_DK') ? 'DK' : 'SE');
+            paymentRecord.BillingCountry__c = PS_PaymentUtility.getCountryCodeFromMarketUnit(accountRelatedToOpportunity[0].Market_Unit__c);
 
             paymentRecord.Billing_name__c = accountRelatedToOpportunity[0].Name;
 
@@ -350,7 +350,7 @@ public with sharing class PS_PaymentService {
 //DFJ-80
     public static PS_PaymentUtility.PaymentWrapper createPaymentRecordOnAccount(Id recordId, Order orderRecord, String orderProductList, Decimal orderFixedDisc, Decimal totalOrder, String selectedJournal) {
         PS_PaymentUtility.PaymentWrapper paymentRelatedWrapperInstance = new PS_PaymentUtility.PaymentWrapper();
-        List<Journal_Address_Configration__mdt> recordFormConfigurationInstance = new List<Journal_Address_Configration__mdt>();
+        List<DocFab_Record_Model__mdt> recordFormConfigurationInstance = new List<DocFab_Record_Model__mdt>();
         try {
 
 
@@ -379,24 +379,18 @@ public with sharing class PS_PaymentService {
             getAddresInfoFromJournal = [SELECT Id, DocFab_Record_Model_ID__c, External_record_uuid__c, Type__c FROM Journal__c WHERE Id = :selectedJournal AND Account__c = :getAccountRec[0].Id LIMIT 1];
 
 
-            if (!getAddresInfoFromJournal.isEmpty()) {
+            if (!getAddresInfoFromJournal.isEmpty() && getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c != null) {
 
 
                 recordFormConfigurationInstance = [
                         SELECT Id,
-
-                                Market_unit_name__c,
-                                Journal_type__c,
+                                Record_Model_Id__c,
                                 Journal_Object__c,
                                 Address_Configuration_Fields__c
                         FROM
-                                Journal_Address_Configration__mdt
+                                DocFab_Record_Model__mdt
                         WHERE
-                                Market_unit_name__c = :getAccountRec[0].Market_Unit__c
-                                AND
-                                Journal_type__c = :getAddresInfoFromJournal[0].Type__c
-                                AND
-                                Default_Record_model_id__c = :getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c
+                                Record_Model_Id__c = :String.valueOf(getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c)
                         LIMIT 1
                 ];
 
@@ -463,7 +457,7 @@ public with sharing class PS_PaymentService {
             paymentRecord.Journal__c = !String.isBlank(orderRecord.Journal__c) ? orderRecord.Journal__c : null ;
             paymentRecord.IsInsertOrder__c = true;
             //End
-            paymentRecord.BillingCountry__c = (getAccountRec[0].Market_Unit__c == 'DFJ_DK' || getAccountRec[0].Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE');
+            paymentRecord.BillingCountry__c = PS_PaymentUtility.getCountryCodeFromMarketUnit(getAccountRec[0].Market_Unit__c);
             paymentRecord.Billing_name__c = getAccountRec[0].Name;
             paymentRecord.Billing_email__c = getAccountRec[0].PersonEmail;
             // paymentRecord.Fixed_discount_Type__c = orderFixedDisc; //DIN-337
@@ -609,7 +603,7 @@ public with sharing class PS_PaymentService {
             paymentRecord.BillingCity__c = sObjectType.equalsIgnoreCase('Lead') ? currentLead[0].City : (sObjectType.equalsIgnoreCase('Order') ? currentOrder[0].BillingCity : '');
             //Chnages TCS-50 Start
             //paymentRecord.BillingCountry__c = sObjectType.equalsIgnoreCase('Lead') ? currentLead[0].CurrencyIsoCode : ( sObjectType.equalsIgnoreCase('Order') ? currentOrder[0].BillingCountry : '' );
-            paymentRecord.BillingCountry__c = sObjectType.equalsIgnoreCase('Lead') ? (currentLead[0].Market_Unit__c == 'DFJ_DK' || currentLead[0].Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE') : (sObjectType.equalsIgnoreCase('Order') ? (currentOrder[0].Account.Market_Unit__c == 'DFJ_DK' || currentOrder[0].Account.Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE') : '');
+            paymentRecord.BillingCountry__c = sObjectType.equalsIgnoreCase('Lead') ? PS_PaymentUtility.getCountryCodeFromMarketUnit(currentLead[0].Market_Unit__c) : (sObjectType.equalsIgnoreCase('Order') ? PS_PaymentUtility.getCountryCodeFromMarketUnit(currentOrder[0].Account.Market_Unit__c) : '');
             //End
             paymentRecord.Billing_name__c = sObjectType.equalsIgnoreCase('Lead') ? currentLead[0].Name : (sObjectType.equalsIgnoreCase('Order') ? currentOrder[0].Account.Name : '');
             paymentRecord.Billing_email__c = sObjectType.equalsIgnoreCase('Lead') ? currentLead[0].Email : (sObjectType.equalsIgnoreCase('Order') ? currentOrder[0].Account.PersonEmail : '');
@@ -934,7 +928,7 @@ public with sharing class PS_PaymentService {
                 return customerResponseWrapperInstance;
             } else if (response.getStatusCode() == 400) {
                 PS_PaymentUtility.CustomerResponseWrapper customerResponse = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
-                if (customerResponse.message.equals('customer already exists') && customerResponse.http_status == 400) {
+                if (customerResponse.message != null && customerResponse.message.equals('customer already exists') && customerResponse.http_status == 400) {
                     customerResponseWrapperInstance.message = customerResponse.message;
                     return customerResponseWrapperInstance;
                 } else {
@@ -1514,7 +1508,7 @@ public with sharing class PS_PaymentService {
     public static PS_PaymentUtility.PS_AddressInfoWrapper getAddressInfoFromLeadOROrder(String recordId) {
         try {
             PS_PaymentUtility.PS_AddressInfoWrapper addressInfoWrapper = new PS_PaymentUtility.PS_AddressInfoWrapper();
-            List<Record_form_configuration__mdt> recordFormConfigurationInstance = new List<Record_form_configuration__mdt>();
+            List<DocFab_Record_Model__mdt> recordFormConfigurationInstance = new List<DocFab_Record_Model__mdt>();
             List<Journal__c> journalRecordList = new List<Journal__c>();
             List<Lead> getAddresInfoFromLead = new List<Lead>();
             List<LeadProducts__c> leadProducts = new List<LeadProducts__c>();
@@ -1544,6 +1538,7 @@ public with sharing class PS_PaymentService {
                     SELECT Id,
                             Lead__c,
                             External_record_uuid__c,
+                            DocFab_Record_Model_ID__c,
                             Type__c
                     FROM
                             Journal__c
@@ -1551,26 +1546,21 @@ public with sharing class PS_PaymentService {
                             Lead__c = :recordId
                     LIMIT 1
             ];
-            if (!getAddresInfoFromLead.isEmpty() && !journalRecordList.isEmpty()) {
+            if (!getAddresInfoFromLead.isEmpty() && !journalRecordList.isEmpty() && journalRecordList[0].DocFab_Record_Model_ID__c != null) {
 
                 recordFormConfigurationInstance = [
                         SELECT Id,
-                                MasterLabel,
-                                Market_unit_name__c,
-                                Record_modal_id__c,
-                                Journal_type__c,
-                                Docfab_Journal_Object__c,
+                                Record_Model_Id__c,
+                                Journal_Object__c,
                                 Address_Configuration_Fields__c
                         FROM
-                                Record_form_configuration__mdt
+                                DocFab_Record_Model__mdt
                         WHERE
-                                Market_unit_name__c = :getAddresInfoFromLead[0].Market_Unit__c
-                                AND
-                                Journal_type__c = :journalRecordList[0].Type__c
+                                Record_Model_Id__c = :String.valueOf(journalRecordList[0].DocFab_Record_Model_ID__c)
                         LIMIT 1
                 ];
 
-                if (!recordFormConfigurationInstance.isEmpty() && String.isNotBlank(recordFormConfigurationInstance[0].Docfab_Journal_Object__c) && String.isNotBlank(recordFormConfigurationInstance[0].Address_Configuration_Fields__c) && String.isNotBlank(journalRecordList[0].External_record_uuid__c)) {
+                if (!recordFormConfigurationInstance.isEmpty() && String.isNotBlank(recordFormConfigurationInstance[0].Journal_Object__c) && String.isNotBlank(recordFormConfigurationInstance[0].Address_Configuration_Fields__c) && String.isNotBlank(journalRecordList[0].External_record_uuid__c)) {
                     Map<String, String> mapOfAddressFieldsConfig = (Map<String, String>) JSON.deserialize(recordFormConfigurationInstance[0].Address_Configuration_Fields__c, Map<String, String>.class);
 
                     String addressFields = '';
@@ -1579,7 +1569,7 @@ public with sharing class PS_PaymentService {
                     }
 
                     addressFields = addressFields.removeEnd(',');
-                    String query = 'SELECT uuid__c, Id, version__c,Journal__c' + (String.isNotBlank(addressFields) ? ',' + addressFields : '') + ' FROM ' + recordFormConfigurationInstance[0].Docfab_Journal_Object__c + ' WHERE Id =\'' + journalRecordList[0].Id + '\'' + ' OR uuid__c =\'' + journalRecordList[0].External_record_uuid__c + '\' LIMIT 1';
+                    String query = 'SELECT uuid__c, Id, version__c,Journal__c' + (String.isNotBlank(addressFields) ? ',' + addressFields : '') + ' FROM ' + recordFormConfigurationInstance[0].Journal_Object__c + ' WHERE Id =\'' + journalRecordList[0].Id + '\'' + ' OR uuid__c =\'' + journalRecordList[0].External_record_uuid__c + '\' LIMIT 1';
 
                     List<SObject> journalRecord = Database.query(query);
                     if (!journalRecord.isEmpty()) {
@@ -1592,7 +1582,7 @@ public with sharing class PS_PaymentService {
                             getAddresInfoFromLead[0].PostalCode = String.isBlank(getAddresInfoFromLead[0].PostalCode) ? (String) journalRecordToUpdate.get(mapOfAddressFieldsConfig.get('PostalCode')) : getAddresInfoFromLead[0].PostalCode;
                             getAddresInfoFromLead[0].Email = String.isBlank(getAddresInfoFromLead[0].Email) ? (String) journalRecordToUpdate.get(mapOfAddressFieldsConfig.get('Email')) : getAddresInfoFromLead[0].Email;
 
-                            String fieldType = getFieldDescription(recordFormConfigurationInstance[0].Docfab_Journal_Object__c, String.valueof(mapOfAddressFieldsConfig.get('Phone')));
+                            String fieldType = getFieldDescription(recordFormConfigurationInstance[0].Journal_Object__c, String.valueof(mapOfAddressFieldsConfig.get('Phone')));
                             getAddresInfoFromLead[0].Phone = String.isBlank(getAddresInfoFromLead[0].Phone) ? (fieldType == 'STRING' ? (String) journalRecordToUpdate.get(mapOfAddressFieldsConfig.get('Phone')) : String.valueof((Decimal) journalRecordToUpdate.get(mapOfAddressFieldsConfig.get('Phone')))) : getAddresInfoFromLead[0].Phone;
                             upsert getAddresInfoFromLead;
                         }
@@ -1616,7 +1606,7 @@ public with sharing class PS_PaymentService {
     public static PS_PaymentUtility.PS_AddressInfoWrapper getAddressInfoFromAccount_Apex(String recordId, String selectedJournal) {
         try {
             PS_PaymentUtility.PS_AddressInfoWrapper addressInfoWrapper = new PS_PaymentUtility.PS_AddressInfoWrapper();
-            List<Journal_Address_Configration__mdt> recordFormConfigurationInstance = new List<Journal_Address_Configration__mdt>();
+            List<DocFab_Record_Model__mdt> recordFormConfigurationInstance = new List<DocFab_Record_Model__mdt>();
             List<Account> getdetailsFromAccount = new List<Account>();
             List<Journal__c> getAddresInfoFromJournal = new List<Journal__c>();
 
@@ -1648,24 +1638,18 @@ public with sharing class PS_PaymentService {
             ];
 
 
-            if (!getAddresInfoFromJournal.isEmpty()) {
+            if (!getAddresInfoFromJournal.isEmpty() && getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c != null) {
 
 
                 recordFormConfigurationInstance = [
                         SELECT Id,
-
-                                Market_unit_name__c,
-                                Journal_type__c,
+                                Record_Model_Id__c,
                                 Journal_Object__c,
                                 Address_Configuration_Fields__c
                         FROM
-                                Journal_Address_Configration__mdt
+                                DocFab_Record_Model__mdt
                         WHERE
-                                Market_unit_name__c = :getdetailsFromAccount[0].Market_Unit__c
-                                AND
-                                Journal_type__c = :getAddresInfoFromJournal[0].Type__c
-                                AND
-                                Default_Record_model_id__c = :getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c
+                                Record_Model_Id__c = :String.valueOf(getAddresInfoFromJournal[0].DocFab_Record_Model_ID__c)
                         LIMIT 1
                 ];
 

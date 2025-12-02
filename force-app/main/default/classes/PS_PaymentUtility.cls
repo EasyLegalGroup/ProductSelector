@@ -5,6 +5,25 @@
 */
 public with sharing class PS_PaymentUtility {
 
+    /**
+     * @Description  Maps Market_Unit__c to ISO 3166-1 alpha-2 country code for Reepay.
+     * @Param        marketUnit - The Market_Unit__c value from the record
+     * @Return       Two-letter country code (DK, SE, IE, etc.)
+    */
+    public static String getCountryCodeFromMarketUnit(String marketUnit) {
+        if (String.isBlank(marketUnit)) {
+            return 'SE'; // Default fallback
+        }
+        if (marketUnit == 'DFJ_DK' || marketUnit == 'Testamente_DK') {
+            return 'DK';
+        } else if (marketUnit == 'FA_SE' || marketUnit == 'Testamente_SV') {
+            return 'SE';
+        } else if (marketUnit == 'Ireland') {
+            return 'IE';
+        }
+        return 'SE'; // Default fallback for unknown market units
+    }
+
     public static String getSobjectTypeFromRecordId_Apex(Id recordId){
         Schema.sObjectType sObjType = recordId.getSObjectType();
         Schema.DescribeSObjectResult sObjDescribeResult = sObjType.getDescribe();        
@@ -149,7 +168,7 @@ public with sharing class PS_PaymentUtility {
         //End
         customerWrapper.city = leadList[0].City;
         //Changes start TCS-50
-        customerWrapper.country = (leadList[0].Market_Unit__c == 'DFJ_DK' || leadList[0].Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE');
+        customerWrapper.country = getCountryCodeFromMarketUnit(leadList[0].Market_Unit__c);
         //End
         customerWrapper.phone = leadList[0].Phone;
         customerWrapper.handle = leadList[0].Email;
@@ -202,7 +221,7 @@ public with sharing class PS_PaymentUtility {
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         customerWrapper.email = OrderList[0].Account.PersonEmail;
         customerWrapper.city = OrderList[0].ShippingCity;
-        customerWrapper.country = (OrderList[0].Account.Market_Unit__c == 'DFJ_DK' || OrderList[0].Account.Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE');
+        customerWrapper.country = getCountryCodeFromMarketUnit(OrderList[0].Account.Market_Unit__c);
         customerWrapper.phone = OrderList[0].Account.Phone;
         customerWrapper.handle = OrderList[0].Account.PersonEmail;
         customerWrapper.test = testConfigurations.Use_test_account__c;// For now true
@@ -220,7 +239,7 @@ public with sharing class PS_PaymentUtility {
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         customerWrapper.email = accountList[0].PersonEmail;
         customerWrapper.city = accountList[0].ShippingCity;
-        customerWrapper.country = (accountList[0].Market_Unit__c == 'DFJ_DK' || accountList[0].Market_Unit__c == 'Testamente_DK' ? 'DK' : 'SE');
+        customerWrapper.country = getCountryCodeFromMarketUnit(accountList[0].Market_Unit__c);
         customerWrapper.phone = accountList[0].Phone;
         customerWrapper.handle = accountList[0].PersonEmail;
         customerWrapper.test = testConfigurations.Use_test_account__c;// For now true

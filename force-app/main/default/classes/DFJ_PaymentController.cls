@@ -517,7 +517,7 @@ public class CustomerResponseWrapper{
 
             paymentRecord.BillingCity__c = accountRelatedToOpportunity[0].BillingCity;
 
-            paymentRecord.BillingCountry__c = (accountRelatedToOpportunity[0].Market_Unit__c.equals('DFJ_DK') || accountRelatedToOpportunity[0].Market_Unit__c.equals('Testamente_DK') ? 'DK' : 'SE');
+            paymentRecord.BillingCountry__c = PS_PaymentUtility.getCountryCodeFromMarketUnit(accountRelatedToOpportunity[0].Market_Unit__c);
 
             paymentRecord.Billing_name__c = accountRelatedToOpportunity[0].Name;
 
@@ -962,7 +962,7 @@ public class CustomerResponseWrapper{
                 return customerResponseWrapperInstance;
             } else if (response.getStatusCode() == 400) {
                 PS_PaymentUtility.CustomerResponseWrapper customerResponse = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
-                if (customerResponse.message.equals('customer already exists') && customerResponse.http_status == 400) {
+                if (customerResponse.message != null && customerResponse.message.equals('customer already exists') && customerResponse.http_status == 400) {
                     customerResponseWrapperInstance.message = customerResponse.message;
                     return customerResponseWrapperInstance;
                 } else {
