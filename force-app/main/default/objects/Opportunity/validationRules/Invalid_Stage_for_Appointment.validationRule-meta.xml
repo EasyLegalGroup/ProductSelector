@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Invalid_Stage_for_Appointment</fullName>
+    <active>true</active>
+    <description>Block using the &quot;Appointment&quot; for marking the Opportunity as Qualification, Closed Won or Closed Lost</description>
+    <errorConditionFormula>AND(
+    $RecordType.DeveloperName = &quot;Customer_Care&quot;,
+    ISPICKVAL(Last_Contact_State__c, &quot;Appointment&quot;),
+    IsClosed
+)</errorConditionFormula>
+    <errorMessage>You cannot use the Appointment button to set the Opportunity to a Closed Stage</errorMessage>
+</ValidationRule>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Heres Law</label>
+    <protected>false</protected>
+    <values>
+        <field>Custom_Permission__c</field>
+        <value xsi:type="xsd:string">PriceBook_Heres_Law</value>
+    </values>
+    <values>
+        <field>Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl81MWY2YjlkMmIzMDZlZjM1MmUxYjI3ZTFmMDg5OWI3NDo=</value>
+    </values>
+    <values>
+        <field>Internal_Identifier__c</field>
+        <value xsi:type="xsd:string">Heres_Law</value>
+    </values>
+</CustomMetadata>

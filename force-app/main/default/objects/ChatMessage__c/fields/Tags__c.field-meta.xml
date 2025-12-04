@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tags__c</fullName>
+    <label>Tags</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Simple</fullName>
+                <default>false</default>
+                <label>Simple</label>
+            </value>
+            <value>
+                <fullName>Advanced</fullName>
+                <default>false</default>
+                <label>Advanced</label>
+            </value>
+            <value>
+                <fullName>Data Correction</fullName>
+                <default>false</default>
+                <label>Data Correction</label>
+            </value>
+            <value>
+                <fullName>Prenuptial Agreement</fullName>
+                <default>false</default>
+                <label>Prenuptial Agreement</label>
+            </value>
+            <value>
+                <fullName>Document Adjustment</fullName>
+                <default>false</default>
+                <label>Document Adjustment</label>
+            </value>
+            <value>
+                <fullName>Conflicting Wills</fullName>
+                <default>false</default>
+                <label>Conflicting Wills</label>
+            </value>
+            <value>
+                <fullName>Undivided Estate</fullName>
+                <default>false</default>
+                <label>Undivided Estate</label>
+            </value>
+            <value>
+                <fullName>General Power of Attorney</fullName>
+                <default>false</default>
+                <label>General Power of Attorney</label>
+            </value>
+            <value>
+                <fullName>Contact Detail Change</fullName>
+                <default>false</default>
+                <label>Contact Detail Change</label>
+            </value>
+            <value>
+                <fullName>Document Question</fullName>
+                <default>false</default>
+                <label>Document Question</label>
+            </value>
+            <value>
+                <fullName>Will</fullName>
+                <default>false</default>
+                <label>Will</label>
+            </value>
+            <value>
+                <fullName>Availability Check</fullName>
+                <default>false</default>
+                <label>Availability Check</label>
+            </value>
+            <value>
+                <fullName>Status Update Request</fullName>
+                <default>false</default>
+                <label>Status Update Request</label>
+            </value>
+            <value>
+                <fullName>Personal Data Provided</fullName>
+                <default>false</default>
+                <label>Personal Data Provided</label>
+            </value>
+            <value>
+                <fullName>Document Approval</fullName>
+                <default>false</default>
+                <label>Document Approval</label>
+            </value>
+            <value>
+                <fullName>General Question</fullName>
+                <default>false</default>
+                <label>General Question</label>
+            </value>
+            <value>
+                <fullName>Meeting Scheduling</fullName>
+                <default>false</default>
+                <label>Meeting Scheduling</label>
+            </value>
+            <value>
+                <fullName>Child Custody</fullName>
+                <default>false</default>
+                <label>Child Custody</label>
+            </value>
+            <value>
+                <fullName>Sensitive Legal Conflict</fullName>
+                <default>false</default>
+                <label>Sensitive Legal Conflict</label>
+            </value>
+            <value>
+                <fullName>Future Power of Attorney</fullName>
+                <default>false</default>
+                <label>Future Power of Attorney</label>
+            </value>
+            <value>
+                <fullName>Medium</fullName>
+                <default>false</default>
+                <label>Medium</label>
+            </value>
+            <value>
+                <fullName>Death Notification</fullName>
+                <default>false</default>
+                <label>Death Notification</label>
+            </value>
+            <value>
+                <fullName>Address Change</fullName>
+                <default>false</default>
+                <label>Address Change</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

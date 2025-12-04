@@ -1,0 +1,187 @@
+<template>
+    <lightning-card title="Test Data Generator" icon-name="custom:custom63">
+        <div class="slds-p-around_medium">
+            <!-- Description -->
+            <div class="slds-m-bottom_medium">
+                <p class="slds-text-body_regular">
+                    Generate test data for sandbox testing. This will create:
+                </p>
+                <ul class="slds-list_dotted slds-m-top_small slds-m-left_medium">
+                    <li>20 Leads (5 DFJ_DK, 5 FA_SE, 5 Ireland, 5 Host)</li>
+                    <li>10 PersonAccounts (converted from Leads)</li>
+                    <li>13 Orders (7 accounts with 1 order, 3 accounts with 2 orders)</li>
+                    <li>13 Journals (with bidirectional Order relationship)</li>
+                </ul>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="slds-m-bottom_medium">
+                <lightning-button
+                    variant="brand"
+                    label="Generate Test Data"
+                    title="Click to generate test data"
+                    onclick={handleGenerateTestData}
+                    disabled={isGenerating}
+                    icon-name="utility:add"
+                    class="slds-m-right_small"
+                ></lightning-button>
+                
+                <template if:true={isGenerating}>
+                    <lightning-spinner
+                        alternative-text="Generating test data..."
+                        size="small"
+                    ></lightning-spinner>
+                    <span class="slds-m-left_small slds-text-body_small">
+                        Generating test data, please wait...
+                    </span>
+                </template>
+            </div>
+
+            <!-- Success Results -->
+            <template if:true={isSuccess}>
+                <div class="slds-box slds-theme_success slds-m-top_medium">
+                    <div class="slds-text-heading_small slds-m-bottom_small">
+                        <lightning-icon
+                            icon-name="utility:success"
+                            size="small"
+                            class="slds-m-right_x-small"
+                            variant="inverse"
+                        ></lightning-icon>
+                        Success!
+                    </div>
+                    <p class="slds-m-bottom_medium">{resultMessage}</p>
+                    
+                    <!-- Created Records Summary -->
+                    <template if:true={hasCreatedRecords}>
+                        <div class="slds-m-bottom_medium">
+                            <h4 class="slds-text-heading_small slds-m-bottom_small">
+                                Created Records ({totalRecordsCreated} total):
+                            </h4>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <template for:each={createdRecords} for:item="record">
+                                    <div key={record.id} class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <div class="slds-media slds-media_small">
+                                            <div class="slds-media__figure">
+                                                <lightning-icon
+                                                    icon-name={record.icon}
+                                                    size="small"
+                                                    class="slds-icon_container"
+                                                ></lightning-icon>
+                                            </div>
+                                            <div class="slds-media__body">
+                                                <div class="slds-text-body_regular">
+                                                    <strong>{record.count} {record.type}</strong>
+                                                </div>
+                                                <div class="slds-text-body_small slds-text-color_weak">
+                                                    {record.description}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <!-- Progress Details -->
+                    <template if:true={hasProgress}>
+                        <lightning-accordion>
+                            <lightning-accordion-section name="progress" label="View Generation Steps">
+                                <div class="slds-text-body_small">
+                                    <pre class="slds-scrollable_x">{progressDetails}</pre>
+                                </div>
+                            </lightning-accordion-section>
+                        </lightning-accordion>
+                    </template>
+                </div>
+                
+                <!-- Warnings (if any) -->
+                <template if:true={hasWarnings}>
+                    <div class="slds-box slds-theme_warning slds-m-top_small">
+                        <div class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon
+                                icon-name="utility:warning"
+                                size="small"
+                                class="slds-m-right_x-small"
+                            ></lightning-icon>
+                            Warnings
+                        </div>
+                        <p class="slds-m-bottom_small">Some records had issues but generation continued:</p>
+                        <lightning-accordion>
+                            <lightning-accordion-section name="warnings" label="View Warning Details">
+                                <div class="slds-text-body_small">
+                                    <pre class="slds-scrollable_x">{warningDetails}</pre>
+                                </div>
+                            </lightning-accordion-section>
+                        </lightning-accordion>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Error Results -->
+            <template if:true={isError}>
+                <div class="slds-box slds-theme_error slds-m-top_medium">
+                    <div class="slds-text-heading_small slds-m-bottom_small">
+                        <lightning-icon
+                            icon-name="utility:error"
+                            size="small"
+                            class="slds-m-right_x-small"
+                            variant="inverse"
+                        ></lightning-icon>
+                        Error
+                    </div>
+                    <p class="slds-m-bottom_medium">{resultMessage}</p>
+                    
+                    <!-- Any partial success before error -->
+                    <template if:true={hasCreatedRecords}>
+                        <div class="slds-m-bottom_medium">
+                            <h4 class="slds-text-heading_small slds-m-bottom_small">
+                                Records Created Before Error:
+                            </h4>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <template for:each={createdRecords} for:item="record">
+                                    <div key={record.id} class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <div class="slds-media slds-media_small">
+                                            <div class="slds-media__figure">
+                                                <lightning-icon
+                                                    icon-name={record.icon}
+                                                    size="small"
+                                                    class="slds-icon_container"
+                                                ></lightning-icon>
+                                            </div>
+                                            <div class="slds-media__body">
+                                                <div class="slds-text-body_regular">
+                                                    <strong>{record.count} {record.type}</strong>
+                                                </div>
+                                                <div class="slds-text-body_small slds-text-color_weak">
+                                                    {record.description}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <!-- Error Details -->
+                    <lightning-accordion allow-multiple-sections-open>
+                        <lightning-accordion-section name="errorDetails" label="Error Details" is-open>
+                            <div class="slds-text-body_small">
+                                <pre class="slds-scrollable_x">{errorDetails}</pre>
+                            </div>
+                        </lightning-accordion-section>
+                        
+                        <template if:true={hasProgress}>
+                            <lightning-accordion-section name="progressBeforeError" label="Progress Before Error">
+                                <div class="slds-text-body_small">
+                                    <pre class="slds-scrollable_x">{progressDetails}</pre>
+                                </div>
+                            </lightning-accordion-section>
+                        </template>
+                    </lightning-accordion>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

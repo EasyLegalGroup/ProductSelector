@@ -4,12 +4,12 @@
  * @Description
  */
 public class DFJProductService_Class {
-	@AuraEnabled
-    public static DFJProductController_Class.ProductsWrapper getAllThePricebooksAndProducts_Apex (String recordId, String objectApiName){
+    @AuraEnabled
+    public static DFJProductController_Class.ProductsWrapper getAllThePricebooksAndProducts_Apex (String recordId, String objectApiName, String defaultPriceBookIdentifier){
         if (recordId == null || recordId.trim() == '' || objectApiName == null) {
             return null;
         }
-        return DFJProductController_Class.getAllPriceBookAndProducts(recordId, objectApiName);
+        return DFJProductController_Class.getAllPriceBookAndProducts(recordId, objectApiName, defaultPriceBookIdentifier);
     }
 
 	@AuraEnabled

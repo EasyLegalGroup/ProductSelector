@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enforce_Correct_RecordType_to_MarketUnit</fullName>
+    <active>false</active>
+    <description>Ensures that the RecordType.DeveloperName matches the corresponding Market_Unit__c value.</description>
+    <errorConditionFormula>AND(
+  RecordType.DeveloperName &lt;&gt; &quot;Host&quot;,
+  OR(
+    /* If Market_Unit is DFJ_DK/Testamente_DK but RecordType is not DFJ_DK */
+    AND(
+      OR(
+        ISPICKVAL(Market_Unit__c, &quot;DFJ_DK&quot;),
+        ISPICKVAL(Market_Unit__c, &quot;Testamente_DK&quot;)
+      ),
+      RecordType.DeveloperName &lt;&gt; &quot;DFJ_DK&quot;
+    ),
+
+    /* If Market_Unit is FA_SE/Testamente_SV but RecordType is not FA_SE */
+    AND(
+      OR(
+        ISPICKVAL(Market_Unit__c, &quot;FA_SE&quot;),
+        ISPICKVAL(Market_Unit__c, &quot;Testamente_SV&quot;)
+      ),
+      RecordType.DeveloperName &lt;&gt; &quot;FA_SE&quot;
+    ),
+
+    /* If Market_Unit is Ireland but RecordType is not Ireland */
+    AND(
+      ISPICKVAL(Market_Unit__c, &quot;Ireland&quot;),
+      RecordType.DeveloperName &lt;&gt; &quot;Ireland&quot;
+    )
+  )
+)</errorConditionFormula>
+    <errorDisplayField>Market_Unit__c</errorDisplayField>
+    <errorMessage>Ensure that the Record Type matches the selected Market Unit:</errorMessage>
+</ValidationRule>

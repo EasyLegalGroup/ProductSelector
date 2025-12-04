@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Uncheck_Was_TM</fullName>
+    <active>true</active>
+    <description>Prevents ever unchecking the Was TM checbox</description>
+    <errorConditionFormula>/* Prevent Was_TM__c from being unchecked once it’s ever been checked */
+AND(
+    ISCHANGED(Was_TM__c),      /* user is changing the field */
+    NOT(Was_TM__c),            /* new value = FALSE (unchecked) */
+    PRIORVALUE(Was_TM__c)      /* old value was TRUE (checked) */
+)</errorConditionFormula>
+    <errorDisplayField>Was_TM__c</errorDisplayField>
+    <errorMessage>Was TM can’t be unchecked once it’s set</errorMessage>
+</ValidationRule>

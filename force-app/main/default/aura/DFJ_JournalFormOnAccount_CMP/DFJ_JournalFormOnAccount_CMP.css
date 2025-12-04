@@ -1,0 +1,16 @@
+.THIS {
+}
+
+.THIS.main-div{
+    background: white;
+    border-radius: 0.5rem;
+}
+.THIS.addSpaceInFooter{
+    padding-left: 6px;
+
+}
+/* .THIS.slds-modal__container{
+    width: 50%;
+    max-width: 40rem;
+    min-width: 20rem;
+} */

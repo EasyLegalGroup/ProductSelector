@@ -14,6 +14,7 @@ import getPaymentRecords from '@salesforce/apex/PS_PaymentController.getPaymentR
 
 export default class Dfj_ProductSelectorCmp extends LightningElement {
 
+    @api defaultPriceBook; // Design attribute for default pricebook identifier
 
     @track priceBooks = []; //PriceBook2
     @track productLineItems = [];
@@ -43,6 +44,7 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     @track isProductListDelete;
     @track isOpportunityObjectType = false;//Added by Kajal at 11.11
     @track isPaymentInProgress = false;
+    @track permissionError = null; // Track permission errors
     isPaymentCreated = false;
     priceBookOptionsForCombobox = [];
     selectedPriceBookIdUsingCombobox;
@@ -238,8 +240,18 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         return !this.selectedPriceBookIdUsingCombobox;
     }
 
+    // Getter to check if there's a permission error
+    get hasPermissionError() {
+        return this.permissionError !== null;
+    }
+
     async getAllProductsData() {
-        await getAllThePricebooksAndProducts_Apex({recordId: this.recordId, objectApiName: this._objectAPIName}).then(result => {
+        this.permissionError = null; // Reset error state
+        await getAllThePricebooksAndProducts_Apex({
+            recordId: this.recordId, 
+            objectApiName: this._objectAPIName,
+            defaultPriceBookIdentifier: this.defaultPriceBook
+        }).then(result => {
             try {
                 if (result) {
                     let priceBooks = [];
@@ -302,7 +314,18 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
             } catch (error) {
                 console.error('error Message-->',error);
             }
-        })
+        }).catch(error => {
+            // Handle Apex errors (including permission errors)
+            console.error('Apex error:', error);
+            let errorMessage = 'An error occurred while loading products.';
+            if (error && error.body && error.body.message) {
+                errorMessage = error.body.message;
+            } else if (error && error.message) {
+                errorMessage = error.message;
+            }
+            this.permissionError = errorMessage;
+            this.showSuccessToast('Error', errorMessage, 'error');
+        });
     }
 
     whenProductLineEmpty(){

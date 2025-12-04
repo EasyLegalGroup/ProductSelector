@@ -3,7 +3,7 @@
  * @Date : 06/11/2025
  * @Description
  */
-public class DFJProductController_Class {
+public without sharing class DFJProductController_Class {
     private static List<String> fieldsList;
     private static String condition;
     private static String limitVar;
@@ -111,15 +111,45 @@ public class DFJProductController_Class {
         catch(Exception e){
             throw new AuraHandledException(e.getMessage());
         }
-    }   
+    }
+    
+    /**
+     * Gets the pricebook identifiers the current user has access to based on custom permissions.
+     * Queries Price_Book__mdt CMDT records and checks each custom permission.
+     * @return Set of Internal_Identifier__c values the user can access
+     */
+    public static Set<String> getAccessiblePricebookIdentifiers() {
+        Set<String> accessibleIdentifiers = new Set<String>();
+        
+        // Query all Price_Book__mdt records
+        List<Price_Book__mdt> priceBookConfigs = [SELECT Custom_Permission__c, Internal_Identifier__c FROM Price_Book__mdt];
+        
+        // Check which custom permissions the user has
+        for (Price_Book__mdt config : priceBookConfigs) {
+            if (String.isNotBlank(config.Custom_Permission__c) && 
+                FeatureManagement.checkPermission(config.Custom_Permission__c)) {
+                accessibleIdentifiers.add(config.Internal_Identifier__c);
+            }
+        }
+        
+        return accessibleIdentifiers;
+    }
     
     public static ProductsWrapper getAllPriceBookAndProducts(String recordId, String objectApiName){
+        return getAllPriceBookAndProducts(recordId, objectApiName, null);
+    }
+    
+    public static ProductsWrapper getAllPriceBookAndProducts(String recordId, String objectApiName, String defaultPriceBookIdentifier){
         try {
             Map<Id, Pricebook2> IdVSPricebook2s = new Map<Id, Pricebook2>();
             Map<Id, List<PricebookEntry>> priceBookIdVSPricebookEntries = new Map<Id, List<PricebookEntry>>();
             Map<Pricebook2, List<PricebookEntry>> pricebookVSPriceBookEntry = new Map<Pricebook2, List<PricebookEntry>>();
             List<Pricebook2> listOfPricebooks = new List<Pricebook2>();
             List<PricebookEntry> listOfProducts = new List<PricebookEntry>();
+            
+            // Get accessible pricebook identifiers based on custom permissions
+            Set<String> accessibleIdentifiers = getAccessiblePricebookIdentifiers();
+            
             if(objectApiName == 'Lead'){
                 fieldsList = new List<String>{'Id', 'Market_Unit__c', 'Fixed_discount_Type__c'};
             }
@@ -133,23 +163,63 @@ public class DFJProductController_Class {
             
             String marketUnitFilterValueToUseToFilterPricebooks = !objList.isEmpty() ? (String)objList[0].get('Market_Unit__c') : '';
             Currency_Configurater__mdt currencyConfigurationMetadata = Currency_Configurater__mdt.getInstance(marketUnitFilterValueToUseToFilterPricebooks);
-            fieldsList = new List<String>{'Id', 'Name', 'CurrencyIsoCode'};
-            limitVar = ' Limit 1';
+            fieldsList = new List<String>{'Id', 'Name', 'CurrencyIsoCode', 'Internal_Identifier__c'};
+            limitVar = ' Limit 10000';
+            
             if(objectApiName == 'Lead'){
-                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE AND Market_Unit__c = \''+marketUnitFilterValueToUseToFilterPricebooks+'\'';
-                limitVar = ' Limit 10000';
+                // Check if user has any pricebook permissions
+                if (accessibleIdentifiers.isEmpty()) {
+                    throw new AuraHandledException('You do not have access to any Price Books. Please contact your administrator to request the appropriate permissions.');
+                }
+                
+                // Build condition to filter by accessible pricebooks
+                String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
+                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE AND Internal_Identifier__c IN (' + identifierStr + ')';
+                
+                // Also filter by Market_Unit if available
+                if (String.isNotBlank(marketUnitFilterValueToUseToFilterPricebooks)) {
+                    condition += ' AND Market_Unit__c = \'' + marketUnitFilterValueToUseToFilterPricebooks + '\'';
+                }
             }
             else if(objectApiName == 'Opportunity'){
-                condition = (String)objList[0].get('Pricebook2Id') != null ? 'Id = \''+ (String)objList[0].get('Pricebook2Id') +'\'' : 
-                'IsActive = true AND IsStandard = false AND Is_Opportunity_PriceBook__c = true AND CurrencyIsoCode = \'' + 
-                    currencyConfigurationMetadata.CurrencyIsoCode__c + '\'';
+                Id existingPricebookId = (Id)objList[0].get('Pricebook2Id');
+                
+                if (existingPricebookId != null) {
+                    // Opportunity already has a pricebook - check if user has access to it
+                    List<Pricebook2> existingPb = [SELECT Id, Name, Internal_Identifier__c FROM Pricebook2 WHERE Id = :existingPricebookId LIMIT 1];
+                    
+                    if (!existingPb.isEmpty()) {
+                        String pbIdentifier = existingPb[0].Internal_Identifier__c;
+                        if (!accessibleIdentifiers.contains(pbIdentifier)) {
+                            throw new AuraHandledException('You do not have the required permissions to use the Price Book "' + existingPb[0].Name + '". Please contact your administrator.');
+                        }
+                    }
+                    
+                    condition = 'Id = \'' + existingPricebookId + '\'';
+                } else {
+                    // No pricebook set - show accessible opportunity pricebooks
+                    if (accessibleIdentifiers.isEmpty()) {
+                        throw new AuraHandledException('You do not have access to any Price Books. Please contact your administrator to request the appropriate permissions.');
+                    }
+                    
+                    String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
+                    condition = 'IsActive = true AND IsStandard = false AND Is_Opportunity_PriceBook__c = true AND Internal_Identifier__c IN (' + identifierStr + ')';
+                    
+                    if (currencyConfigurationMetadata != null && String.isNotBlank(currencyConfigurationMetadata.CurrencyIsoCode__c)) {
+                        condition += ' AND CurrencyIsoCode = \'' + currencyConfigurationMetadata.CurrencyIsoCode__c + '\'';
+                    }
+                }
             }
             //Get Pricebook2
             listOfPricebooks = fetchRecordsDynamically(condition, fieldsList, 'Pricebook2', limitVar);
-            if (objectApiName == 'Lead' && listOfPricebooks.isEmpty()) {
-                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE';
+            
+            // For Lead: if no pricebooks found with Market_Unit filter, try without it
+            if (objectApiName == 'Lead' && listOfPricebooks.isEmpty() && !accessibleIdentifiers.isEmpty()) {
+                String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
+                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE AND Internal_Identifier__c IN (' + identifierStr + ')';
                 listOfPricebooks = fetchRecordsDynamically(condition, fieldsList, 'Pricebook2', limitVar);
             }
+            
             Set<Id> pricebook2Ids = new Set<Id>();
             for(Pricebook2 pbe : listOfPricebooks){
                 pricebook2Ids.add(pbe.Id);
@@ -200,8 +270,11 @@ public class DFJProductController_Class {
             productInstance.productData = productDataWithPriceBooksList;
             productInstance.DefaultCurrencyIsoCode = defaultCurrency;
             return productInstance;
-        } catch (DmlException ex) {
-            throw new AuraHandledException('Error==>' + ex.getMessage() + 'at line number==>' + ex.getLineNumber());
+        } catch (AuraHandledException ahe) {
+            // Re-throw AuraHandledExceptions as-is (permission errors, etc.)
+            throw ahe;
+        } catch (Exception ex) {
+            throw new AuraHandledException('Error==>' + ex.getMessage() + ' at line number==>' + ex.getLineNumber());
         }
     }
     

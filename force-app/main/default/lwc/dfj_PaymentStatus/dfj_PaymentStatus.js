@@ -164,6 +164,16 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         }
     }
 
+    get statusGridClass() {
+        const classes = ['status-grid'];
+        if (this.isPaymentRecordPresent) {
+            classes.push('slds-m-top_small');
+        } else {
+            classes.push('status-grid--no-payment');
+        }
+        return classes.join(' ');
+    }
+
     // get statusVariant() {
     //     const status = this.status ? this.status.toLowerCase() : '';
 
@@ -208,6 +218,7 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
     }
 
     handleDeleteButton() {
+        this.isCancelling = false;
         this.isdeleteConfirmationModal = true;
         console.log('Cancel payment button clicked');
     }
@@ -228,18 +239,23 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
 
     handleCloseModal() {
         this.isdeleteConfirmationModal = false;
+        this.isCancelling = false;
     }
 
     handleCancelPayment() {
+        if (!this.payments.length) {
+            return;
+        }
+
         console.log('Cancel confirmation - Yes clicked');
         console.log('Record ID:', this.recordId);
         console.log('Payment Record ID:', this.payments[0].Id);
-        
+
         this.isCancelling = true;
 
         cancelPayment({ recordId: this.recordId, paymentRecordId: this.payments[0].Id })
             .then(result => {
-                if (result.includes('Success')) {
+                if (result && result.includes('Success')) {
                     this.showToast('Success', result, 'success');
                     this.dispatchEvent(new CustomEvent('paymentcanceled'));
                 } else {
@@ -247,18 +263,18 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
                     this.showToast('Error', errMsg, 'error');
                 }
                 console.log('Result from cancel payment:', result);
-                this.handleCloseModal();
                 return refreshApex(this.wiredResult);
             })
             .then(() => {
                 console.log('Payment data refreshed after cancellation');
-                this.isCancelling = false;
             })
             .catch(error => {
                 console.error('Error cancelling payment:', error);
-                this.showToast('Error', error.body ? error.body.message : error.message || 'Unknown error', 'error');
-                this.handleCloseModal();
+                this.showToast('Error', error?.body ? error.body.message : error?.message || 'Unknown error', 'error');
+            })
+            .finally(() => {
                 this.isCancelling = false;
+                this.handleCloseModal();
             });
     }
 

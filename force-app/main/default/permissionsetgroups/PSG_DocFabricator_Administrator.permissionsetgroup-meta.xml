@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>PSG DocFabricator Administrator</label>
+    <permissionSets>PS_DocFab_Form_11</permissionSets>
+    <permissionSets>PS_DocFab_Form_17</permissionSets>
+    <permissionSets>PS_DocFab_Form_29</permissionSets>
+    <permissionSets>PS_DocFab_Form_34</permissionSets>
+    <permissionSets>PS_DocFab_Form_51</permissionSets>
+    <permissionSets>PS_DocFab_Form_53</permissionSets>
+    <permissionSets>PS_DocFab_RM_122</permissionSets>
+    <permissionSets>PS_DocFab_RM_160</permissionSets>
+    <permissionSets>PS_DocFab_RM_218</permissionSets>
+    <permissionSets>PS_DocFab_RM_230</permissionSets>
+    <permissionSets>PS_DocFab_RM_63</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

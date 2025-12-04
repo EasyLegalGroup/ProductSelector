@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>DFJ_CPRService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DFJ_CPRServiceFlowInvoker</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <customPermissions>
+        <enabled>true</enabled>
+        <name>See_CPR_Checker</name>
+    </customPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>PS-FEAT-CPR-Checker</label>
+</PermissionSet>

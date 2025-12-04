@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Added support for Ireland</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>frmPhoneFormatted</name>
+        <dataType>String</dataType>
+        <expression>IF(
+  BEGINS(SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;), &quot;+&quot;),
+  SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+  IF(
+    OR(
+      BEGINS(SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;), &quot;45&quot;),
+      BEGINS(SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;), &quot;46&quot;),
+      BEGINS(SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;), &quot;353&quot;)
+    ),
+    &quot;+&quot; &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+    CASE(
+      {!$Record.Market_Unit__c},
+      &quot;DFJ_DK&quot;,       &quot;+45&quot;  &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+      &quot;Testamente_DK&quot;,&quot;+45&quot;  &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+      &quot;FA_SE&quot;,        &quot;+46&quot;  &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+      &quot;Ireland&quot;,      &quot;+353&quot; &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;),
+      &quot;+&quot; &amp; SUBSTITUTE({!$Record.Phone},&quot; &quot;,&quot;&quot;)          /* fallback */
+    )
+  )
+)</expression>
+    </formulas>
+    <interviewLabel>RT - Lead: Set FormattedPhone in Phone and MobilePhone {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>RT - Lead: Set FormattedPhone in Phone and MobilePhone</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Lead</name>
+        <label>Update Lead</label>
+        <locationX>176</locationX>
+        <locationY>287</locationY>
+        <inputAssignments>
+            <field>MobilePhone</field>
+            <value>
+                <elementReference>frmPhoneFormatted</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Phone</field>
+            <value>
+                <elementReference>frmPhoneFormatted</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_Lead</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Phone</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Lead</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Obsolete</status>
+</Flow>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Uses a long formula, to populate the field &quot;Mobile Phone&quot; so it can be used by Marketing Cloud</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>FormatPhone</name>
+        <dataType>String</dataType>
+        <expression>IF(
+    OR(
+        ISPICKVAL({!$Record.Campaign.Market_Unit__c}, &quot;DFJ_DK&quot;),
+        ISPICKVAL({!$Record.Campaign.Market_Unit__c}, &quot;Testamente_DK&quot;)
+    ),
+    /* ----------------
+       DK formatting: (+45) + phone digits without any leading 45 / +45 
+       ---------------- */
+    &quot;(+45)&quot; &amp; 
+    IF(
+        BEGINS(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;), &quot;+45&quot;),
+        /* remove the leading +45 */
+        RIGHT(
+            SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;),
+            LEN(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)) - 3
+        ),
+        IF(
+            BEGINS(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;), &quot;45&quot;),
+            /* remove the leading 45 */
+            RIGHT(
+                SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;),
+                LEN(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)) - 2
+            ),
+            /* fallback - just strip spaces and prepend (+45) */
+            SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)
+        )
+    ),
+    IF(
+        ISPICKVAL({!$Record.Campaign.Market_Unit__c}, &quot;FA_SE&quot;),
+        /* ----------------
+           SE formatting: 46 + phone digits (no plus sign)
+           ---------------- */
+        IF(
+            BEGINS(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;), &quot;+46&quot;),
+            /* remove the leading &apos;+&apos; but keep &apos;46&apos; */
+            &quot;46&quot; &amp; RIGHT(
+                      SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;),
+                      LEN(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)) - 3
+                  ),
+            IF(
+                BEGINS(SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;), &quot;46&quot;),
+                /* already starts with 46 - just strip spaces */
+                SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;),
+                /* fallback - add 46 plus the rest */
+                &quot;46&quot; &amp; SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)
+            )
+        ),
+        /* ----------------
+           For all other market units,
+           just remove spaces (no country code changes).
+           ---------------- */
+        SUBSTITUTE({!$Record.Phone}, &quot; &quot;, &quot;&quot;)
+    )
+)</expression>
+    </formulas>
+    <interviewLabel>RT - Campaign Member: Set Formatted Phone in Mobile Phone {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>RT - Campaign Member: Set Formatted Phone in Mobile Phone</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Campaign_Member</name>
+        <label>Update Campaign Member</label>
+        <locationX>176</locationX>
+        <locationY>323</locationY>
+        <inputAssignments>
+            <field>Mobile_Phone__c</field>
+            <value>
+                <elementReference>FormatPhone</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_Campaign_Member</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Mobile_Phone__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>CampaignMember</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Obsolete</status>
+    <triggerOrder>400</triggerOrder>
+</Flow>

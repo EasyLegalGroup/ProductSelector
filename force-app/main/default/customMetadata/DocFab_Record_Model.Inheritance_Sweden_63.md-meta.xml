@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Inheritance Sweden (63)</label>
+    <protected>false</protected>
+    <values>
+        <field>Address_Configuration_Fields__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Custom_Permission__c</field>
+        <value xsi:type="xsd:string">DocFab_Record_Model_63_SE_Inheritance</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Deprecated Sweden inheritance journal (FA_SE market unit)</value>
+    </values>
+    <values>
+        <field>Field_Configuration__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Icon__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Journal_Object__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Page_Layout_Label__c</field>
+        <value xsi:type="xsd:string">Sweden Inheritance (Old)</value>
+    </values>
+    <values>
+        <field>Record_Model_Id__c</field>
+        <value xsi:type="xsd:string">63</value>
+    </values>
+</CustomMetadata>

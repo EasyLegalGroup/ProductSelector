@@ -1,0 +1,30 @@
+.anotherhover tbody tr:hover td {
+    background: rgba(33, 110, 206, 0.25) !important;
+}
+.public_fixedDataTableCell_main:hover {
+    background-color: yellow !important;
+}
+.slds-modal__footer{
+    padding:  0.5rem 1rem;
+}
+.productSelector{
+    overflow: initial;
+
+}
+/* .slds-modal__content{
+    overflow: initial;
+    
+} */
+.displayinline{
+    display: inline;
+}
+.addSpaceInFooter{
+    padding-left: 6px;
+}
+.slds-hint-parent {
+  padding: 10px;
+}
+
+.negative {
+  padding-left: 30px; /* Adjust the shift amount as needed */
+}

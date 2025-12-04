@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Appointment_Set_Appointment_Status</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>SF_Delete_All_Lead_Products_from_Lead</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>SF_Display_Lecture_Registration_Form_TM_on_Lead</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Screen_Flow_Display_Existing_Identity_Checks</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Screen_Flow_Set_Meeting_Status_after_Call_Ends</flow>
+    </flowAccesses>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>PS-FEAT-DialerFlows</label>
+</PermissionSet>

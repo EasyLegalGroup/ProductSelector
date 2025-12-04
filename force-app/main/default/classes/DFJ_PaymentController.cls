@@ -26,6 +26,48 @@ public with sharing class DFJ_PaymentController {
     public static String cancelSubscriptionApiEndpoint = 'https://api.reepay.com/v1/subscription/{handle}/cancel';
     public static String offlineManualSettleEndpoint = 'https://api.reepay.com/v1/invoice/{id}/manual_settle';
 
+    // Test context variable for mocking private key
+    @TestVisible
+    private static String testPrivateKey = null;
+
+    /**
+     * @description Gets the Reepay private key based on the Pricebook's Internal_Identifier__c.
+     * @param pricebookId The Pricebook2 Id to lookup the configuration for
+     * @return The Base64 encoded private key for Reepay API authentication
+     */
+    public static String getReepayPrivateKeyByPricebook(Id pricebookId) {
+        // In test context, return the test private key if set
+        if (Test.isRunningTest() && testPrivateKey != null) {
+            return testPrivateKey;
+        }
+        
+        if (pricebookId == null) {
+            throw new AuraHandledException('Pricebook is required for payment processing.');
+        }
+        
+        List<Pricebook2> pricebooks = [SELECT Id, Internal_Identifier__c, Name FROM Pricebook2 WHERE Id = :pricebookId LIMIT 1];
+        if (pricebooks.isEmpty() || String.isBlank(pricebooks[0].Internal_Identifier__c)) {
+            throw new AuraHandledException('Pricebook not found or missing Internal Identifier.');
+        }
+        
+        List<Price_Book__mdt> priceBookConfigs = [
+            SELECT Encoded_Private_Key__c 
+            FROM Price_Book__mdt 
+            WHERE Internal_Identifier__c = :pricebooks[0].Internal_Identifier__c 
+            LIMIT 1
+        ];
+        
+        if (priceBookConfigs.isEmpty() || String.isBlank(priceBookConfigs[0].Encoded_Private_Key__c)) {
+            throw new AuraHandledException('Reepay configuration not found for Pricebook: ' + pricebooks[0].Name);
+        }
+        
+        return priceBookConfigs[0].Encoded_Private_Key__c;
+    }
+    
+    public static String getReepayPrivateKeyFromPayment(Payments__c payment) {
+        return getReepayPrivateKeyByPricebook(payment.Pricebook2Id__c);
+    }
+
 public class CustomerResponseWrapper{
         public String error;
         public String message;
@@ -61,7 +103,7 @@ public class CustomerResponseWrapper{
             List<LeadProducts__c> leadProductToDelete = new List<LeadProducts__c>();
             String subscriptionToCancel = '';
 
-			paymentToCancel = [SELECT Id, CurrencyIsoCode, Status__c, Cancellation_date__c, Amount__c, Lead__c, Order__c, Opportunity__c FROM Payments__c WHERE Id = :paymentRecordId LIMIT 1];
+			paymentToCancel = [SELECT Id, CurrencyIsoCode, Pricebook2Id__c, Status__c, Cancellation_date__c, Amount__c, Lead__c, Order__c, Opportunity__c FROM Payments__c WHERE Id = :paymentRecordId LIMIT 1];
             if (paymentToCancel.isEmpty()) {
                 DFJ_ErrorLogController.addErrorLogs('', 'Cancelling the invoice in reepay', 'Payment record not found with Id : ' + paymentRecordId, 'Error', 'PS_PaymentService.cancelPayment', '', '');
                 return 'Payment record not found.';
@@ -80,10 +122,10 @@ public class CustomerResponseWrapper{
             }
 
 			if (String.isNotBlank(subscriptionToCancel)) {
-                cancelSubscriptionFromId(subscriptionToCancel, paymentToCancel[0].CurrencyIsoCode);
+                cancelSubscriptionFromId(subscriptionToCancel, paymentToCancel[0].Pricebook2Id__c);
             }
 
-			messageToReturn = paymentToCancel[0].Amount__c > 0 ? cancelInvoiceFromId(paymentRecordId, paymentToCancel[0].CurrencyIsoCode) : 'Success : 0 amount invoice not in reepay.';
+			messageToReturn = paymentToCancel[0].Amount__c > 0 ? cancelInvoiceFromId(paymentRecordId, paymentToCancel[0].Pricebook2Id__c) : 'Success : 0 amount invoice not in reepay.';
             if (messageToReturn.contains('Success')) {
                 paymentToCancel[0].Status__c = 'Cancelled';
                 paymentToCancel[0].Cancellation_date__c = Datetime.now();
@@ -101,9 +143,9 @@ public class CustomerResponseWrapper{
         }
 	}
 
-	 public static Boolean cancelSubscriptionFromId(String subscriptionToCancel, String CurrencyInSubscription) {
+	 public static Boolean cancelSubscriptionFromId(String subscriptionToCancel, Id pricebookId) {
         try {
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(CurrencyInSubscription);
+            String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
             HttpRequest request = new HttpRequest();
 
             String endpointUrl = cancelSubscriptionURL + subscriptionToCancel + '/cancel';//cancelSubscriptionURL.replaceAll('{handle}', subscriptionToCancel);
@@ -112,7 +154,7 @@ public class CustomerResponseWrapper{
 
             request.setEndpoint(endpointUrl);
             request.setMethod('POST');
-            request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+            request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
             request.setHeader('Accept', 'application/json');
             request.setHeader('Content-Type', 'application/json');
             request.setTimeout(120000);
@@ -130,9 +172,9 @@ public class CustomerResponseWrapper{
         return false;
     }
 
-	  public static String cancelInvoiceFromId(String invoiceToCancel, String CurrencyInSubscription) {
+	  public static String cancelInvoiceFromId(String invoiceToCancel, Id pricebookId) {
         try {
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(CurrencyInSubscription);
+            String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
             HttpRequest request = new HttpRequest();
 
             String endpointUrl = settleInvoiceURL + invoiceToCancel + '/cancel';
@@ -142,7 +184,7 @@ public class CustomerResponseWrapper{
 
             request.setEndpoint(endpointUrl);
             request.setMethod('POST');
-            request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+            request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
             request.setHeader('Accept', 'application/json');
             request.setHeader('Content-Type', 'application/json');
             request.setTimeout(120000);
@@ -582,7 +624,7 @@ public class CustomerResponseWrapper{
         PS_PaymentUtility.CustomerResponseWrapper responseWrapperIns = new PS_PaymentUtility.CustomerResponseWrapper();
 
         try {
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(payment.CurrencyISOCode);
+            String reepayPrivateKey = getReepayPrivateKeyFromPayment(payment);
 
 
             //Changes TCS-35 start
@@ -597,7 +639,7 @@ public class CustomerResponseWrapper{
 
                 request.setEndpoint(endpointUrl);
                 request.setMethod('POST');
-                request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+                request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
                 request.setHeader('Accept', 'application/json');
                 request.setHeader('Content-Type', 'application/json');
                 request.setTimeout(120000);
@@ -701,7 +743,24 @@ public class CustomerResponseWrapper{
                 payment.Subscription_status__c = 'No subscription included';
             }
             //end
-            update payment;
+            
+            // Rollback: If invoice creation failed, delete the Payment and related Payment Order Lines
+            if (String.isNotBlank(responseWrapperIns.error)) {
+                try {
+                    // Delete related Payment Order Lines first (child records)
+                    List<Payment_order_line__c> relatedOrderLines = [SELECT Id FROM Payment_order_line__c WHERE Payments__c = :payment.Id];
+                    if (!relatedOrderLines.isEmpty()) {
+                        delete relatedOrderLines;
+                    }
+                    // Delete the Payment record
+                    delete payment;
+                    DFJ_ErrorLogController.addErrorLogs('', 'Reepay invoice creation failed - rolled back Payment record', responseWrapperIns.error, 'Warning', 'DFJ_PaymentController.createReepayCustomerInvoice', '', '');
+                } catch (Exception rollbackEx) {
+                    DFJ_ErrorLogController.addErrorLogs('', 'Failed to rollback Payment record after Reepay error', rollbackEx.getMessage(), 'Error', 'DFJ_PaymentController.createReepayCustomerInvoice', '', String.valueOf(rollbackEx.getLineNumber()));
+                }
+            } else {
+                update payment;
+            }
         } catch (Exception ex) {
             responseWrapperIns.error = ex.getMessage();
             DFJ_ErrorLogController.addErrorLogs('', 'Creating ReepayCustomerInvoice', ex.getMessage(), 'Error', 'PS_PaymentService.createReepayCustomerInvoice', '', String.valueOf(ex.getLineNumber()));
@@ -898,15 +957,15 @@ public class CustomerResponseWrapper{
     * @Param        recordId
     * @Return       String
     */
-     public static String checkCustomerAlreadyCreated(String currentEmail, String paymentCurrency) {
-        Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(paymentCurrency);
+     public static String checkCustomerAlreadyCreated(String currentEmail, Id pricebookId) {
+        String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
         Boolean customerFound = false;
         String endpointUrl = customerCreationURL;
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(endpointUrl + '/' + currentEmail);
         request.setMethod('GET');
-        request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+        request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
         request.setHeader('Accept', 'application/json');
         request.setHeader('Content-Type', 'application/json');
         request.setTimeout(120000);
@@ -929,9 +988,9 @@ public class CustomerResponseWrapper{
     * @Param        recordId
     * @Return       String
     */
-     public static PS_PaymentUtility.CustomerResponseWrapper createReepayCustomer(List<Account> currentAccount, List<Lead> currentLead, List<Order> currentOrder, String metaCurrency, String sObjectType) {
+     public static PS_PaymentUtility.CustomerResponseWrapper createReepayCustomer(List<Account> currentAccount, List<Lead> currentLead, List<Order> currentOrder, Id pricebookId, String sObjectType) {
         PS_PaymentUtility.CustomerResponseWrapper customerResponseWrapperInstance = new PS_PaymentUtility.CustomerResponseWrapper();
-        Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(metaCurrency);
+        String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
         String endpointUrl = customerCreationURL;
         // Changes DFJ-80 :: Added class buildCustomerRequestBodyFromAccount to created request body
 
@@ -949,7 +1008,7 @@ public class CustomerResponseWrapper{
         // String requestBody = constructRequestBody();
         request.setEndpoint(endpointUrl);
         request.setMethod('POST');
-        request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+        request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
         request.setHeader('Accept', 'application/json');
         request.setHeader('Content-Type', 'application/json');
         request.setTimeout(120000);
@@ -987,8 +1046,8 @@ public class CustomerResponseWrapper{
         List<Payments__c> getUpdatedPayment = new List<Payments__c>();
         try {
 
-            // getting the metadata record according to the currency.
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(invoicePayment.CurrencyISOCode);
+            // Get Reepay private key based on Pricebook
+            String reepayPrivateKey = getReepayPrivateKeyFromPayment(invoicePayment);
             HttpRequest request = new HttpRequest();
 
             String endpointUrl = createSubscriptionURL;
@@ -997,7 +1056,7 @@ public class CustomerResponseWrapper{
 
             request.setEndpoint(endpointUrl);
             request.setMethod('POST');
-            request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+            request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
             request.setHeader('Accept', 'application/json');
             request.setHeader('Content-Type', 'application/json');
             request.setTimeout(120000);
@@ -1075,14 +1134,14 @@ public class CustomerResponseWrapper{
         PS_PaymentUtility.PS_PlanInfokWrapper planInfoInstance = new PS_PaymentUtility.PS_PlanInfokWrapper();
         try {
 
-            // For now getting the metadata record according to the currency.
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(payment.CurrencyISOCode);
+            // Get Reepay config based on pricebook
+            String privateKey = getReepayPrivateKeyFromPayment(payment);
             HttpRequest request = new HttpRequest();
 
             String endpointUrl = 'https://api.reepay.com/v1/plan/' + subscriptionProducts[0].get('Plan_handle__c') + '/current' ;
             request.setEndpoint(endpointUrl);
             request.setMethod('GET');
-            request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+            request.setHeader('Authorization', 'Basic ' + privateKey);
             request.setHeader('Accept', 'application/json');
             request.setHeader('Content-Type', 'application/json');
             request.setTimeout(120000);
@@ -1117,8 +1176,8 @@ public class CustomerResponseWrapper{
 
 
         try {
-            // getting the metadata record according to the currency.
-            Reepay_configuration__mdt reepayConfigurationSetting = Reepay_configuration__mdt.getInstance(payment.CurrencyISOCode);
+            // Get Reepay config based on pricebook
+            String privateKey = getReepayPrivateKeyFromPayment(payment);
             HttpRequest request = new HttpRequest();
 
 
@@ -1127,7 +1186,7 @@ public class CustomerResponseWrapper{
             String requestBody = PS_PaymentUtility.constructPaymentLinkBody(payment, true, getPlanInfo, isRecurringSettle);
             request.setEndpoint(endpointUrl);
             request.setMethod('POST');
-            request.setHeader('Authorization', 'Basic ' + reepayConfigurationSetting.Private_key__c);
+            request.setHeader('Authorization', 'Basic ' + privateKey);
             request.setHeader('Accept', 'application/json');
             request.setHeader('Content-Type', 'application/json');
             request.setTimeout(120000);

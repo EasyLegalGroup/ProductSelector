@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>PSG IdentityCheck DK Admin</label>
+    <permissionSets>PS_FEAT_CPR_Checker</permissionSets>
+    <permissionSets>PS_FLS_IdentityCheck_Admin</permissionSets>
+    <permissionSets>PS_OBJ_IdentityCheck_CRUD</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

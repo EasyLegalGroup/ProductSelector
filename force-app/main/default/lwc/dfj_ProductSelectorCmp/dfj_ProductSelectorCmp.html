@@ -7,6 +7,19 @@
         </lightning-spinner>
       </template>
     </div>
+    
+    <!-- Permission Error Display -->
+    <template if:true={hasPermissionError}>
+      <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_medium" role="alert">
+        <span class="slds-assistive-text">error</span>
+        <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small">
+          <lightning-icon icon-name="utility:error" alternative-text="Error" variant="inverse" size="x-small"></lightning-icon>
+        </span>
+        <h2>{permissionErrorMessage}</h2>
+      </div>
+    </template>
+    
+    <template if:false={hasPermissionError}>
     <fieldset class="slds-box">
       <div>
         <div class="slds-clearfix slds-m-bottom_x-small">
@@ -554,8 +567,8 @@
 
     </lightning-layout>
 
-
-
+    </template>
+    <!-- End of hasPermissionError false block -->
 
   </lightning-card>
   <template if:true={isPaymentInProgress}>

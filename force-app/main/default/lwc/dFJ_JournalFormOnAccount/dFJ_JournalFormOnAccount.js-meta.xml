@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>DFJ Journal Form On Account</masterLabel>
+    <description>Creates new journals on Account records with two-tier permission-based DocFab selection.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Account</object>
+            </objects>
+            <property name="recordModelIds" type="String" label="Record Model IDs" 
+                description="Comma-separated list of DocFab Record Model IDs (e.g., '160, 54, 22'). Leave empty to allow all models the user has permission for." />
+            <property name="formNumbers" type="String" label="Form Numbers" 
+                description="Comma-separated list of DocFab Form Numbers (e.g., '17, 51, 22'). Required for form selection." />
+            <property name="buttonLabel" type="String" label="Button Label" default="Create New Journal"
+                description="The label displayed on the button." />
+            <property name="buttonIcon" type="String" label="Button Icon" 
+                description="SLDS icon name for the button (e.g., 'utility:add', 'action:new_note'). Defaults to 'utility:add' if not specified." />
+        </targetConfig>
+        <targetConfig targets="lightning__AppPage,lightning__FlowScreen">
+            <property name="recordModelIds" type="String" label="Record Model IDs" 
+                description="Comma-separated list of DocFab Record Model IDs (e.g., '160, 54, 22'). Leave empty to allow all models the user has permission for." />
+            <property name="formNumbers" type="String" label="Form Numbers" 
+                description="Comma-separated list of DocFab Form Numbers (e.g., '17, 51, 22'). Required for form selection." />
+            <property name="buttonLabel" type="String" label="Button Label" default="Create New Journal"
+                description="The label displayed on the button." />
+            <property name="buttonIcon" type="String" label="Button Icon" 
+                description="SLDS icon name for the button (e.g., 'utility:add', 'action:new_note'). Defaults to 'utility:add' if not specified." />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

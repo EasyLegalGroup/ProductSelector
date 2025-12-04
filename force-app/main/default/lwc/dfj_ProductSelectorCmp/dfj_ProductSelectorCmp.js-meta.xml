@@ -5,4 +5,14 @@
     <targets>
         <target>lightning__RecordPage</target>
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property 
+                name="defaultPriceBook" 
+                type="String" 
+                label="Default Price Book" 
+                description="The Internal Identifier of the default pricebook to use. If not set, user must select from available pricebooks."
+            />
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

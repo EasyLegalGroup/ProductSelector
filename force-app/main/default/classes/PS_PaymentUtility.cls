@@ -5,6 +5,27 @@
 */
 public with sharing class PS_PaymentUtility {
 
+    // Production Org ID - only this org should use live Reepay data
+    public static final String PRODUCTION_ORG_ID = '00D1t000000w9f2';
+
+    /**
+     * @Description  Determines if the current org is the production org.
+     *               Used to decide whether to send test: true to Reepay API.
+     * @Return       True if this is production, false for all sandboxes
+    */
+    public static Boolean isProductionOrg() {
+        return UserInfo.getOrganizationId().startsWith(PRODUCTION_ORG_ID);
+    }
+
+    /**
+     * @Description  Returns whether to use test mode for Reepay API calls.
+     *               Returns true for all non-production orgs (sandboxes).
+     * @Return       True if test mode should be used, false for production
+    */
+    public static Boolean shouldUseTestMode() {
+        return !isProductionOrg();
+    }
+
     /**
      * @Description  Maps Market_Unit__c to ISO 3166-1 alpha-2 country code for Reepay.
      * @Param        marketUnit - The Market_Unit__c value from the record
@@ -160,7 +181,6 @@ public with sharing class PS_PaymentUtility {
     public static String buildCustomerRequestBodyFromLead(List<Lead> leadList){
         //String body = '';
 
-        ReepayTestingConfiguration__c testConfigurations = ReepayTestingConfiguration__c.getOrgDefaults();
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         customerWrapper.email = leadList[0].Email;
         //Changes start TCS-50
@@ -172,7 +192,7 @@ public with sharing class PS_PaymentUtility {
         //End
         customerWrapper.phone = leadList[0].Phone;
         customerWrapper.handle = leadList[0].Email;
-        customerWrapper.test = testConfigurations.Use_test_account__c;// For now true
+        customerWrapper.test = shouldUseTestMode(); // Dynamic based on org - false for production, true for sandboxes
         customerWrapper.postal_code = leadList[0].PostalCode;
         customerWrapper.first_name = leadList[0].FirstName;
         customerWrapper.last_name = leadList[0].LastName;
@@ -188,9 +208,9 @@ public with sharing class PS_PaymentUtility {
     */
     public static String constructSubscriptionRequestBody(Payments__c invoicePayment, List<SObject> subscriptionLeadProducts, String recurringPaymentMethod){
         //String recurringPaymentMethod = '';
-        ReepayTestingConfiguration__c testConfigurations = ReepayTestingConfiguration__c.getOrgDefaults();
+        Boolean useTestMode = shouldUseTestMode();
         String requestBody = '';
-        requestBody = '{"customer":"'+ invoicePayment.Billing_email__c +'","plan":"'+ subscriptionLeadProducts[0].get('Plan_handle__c') +'","test": '+testConfigurations.Use_test_account__c+',"grace_duration": 1800,"signup_method": "source","source":"'+recurringPaymentMethod+'","handle":"'+ subscriptionLeadProducts[0].get('Id')+'"}';// "trial_period": "P1D","no_trial": false,"no_setup_fee": true,"amount_incl_vat": true,
+        requestBody = '{"customer":"'+ invoicePayment.Billing_email__c +'","plan":"'+ subscriptionLeadProducts[0].get('Plan_handle__c') +'","test": '+useTestMode+',"grace_duration": 1800,"signup_method": "source","source":"'+recurringPaymentMethod+'","handle":"'+ subscriptionLeadProducts[0].get('Id')+'"}';// "trial_period": "P1D","no_trial": false,"no_setup_fee": true,"amount_incl_vat": true,
         System.debug('SubscriptionRequestBody-->'+JSON.serialize(requestBody));
         return requestBody;
     }
@@ -203,9 +223,9 @@ public with sharing class PS_PaymentUtility {
     */
     public static String constructSubscriptionRequestBodyWith0Amount(Payments__c invoicePayment, List<SObject> subscriptionLeadProducts){
         //String recurringPaymentMethod = '';
-        ReepayTestingConfiguration__c testConfigurations = ReepayTestingConfiguration__c.getOrgDefaults();
+        Boolean useTestMode = shouldUseTestMode();
         String requestBody = '';
-        requestBody = '{"customer":"'+ invoicePayment.Billing_email__c +'","plan":"'+ subscriptionLeadProducts[0].get('Plan_handle__c') +'","test": '+testConfigurations.Use_test_account__c+',"grace_duration": 1800,"signup_method": "email","handle":"'+ subscriptionLeadProducts[0].Id +'"}';// "trial_period": "P1D","no_trial": false,"no_setup_fee": true,"amount_incl_vat": true,
+        requestBody = '{"customer":"'+ invoicePayment.Billing_email__c +'","plan":"'+ subscriptionLeadProducts[0].get('Plan_handle__c') +'","test": '+useTestMode+',"grace_duration": 1800,"signup_method": "email","handle":"'+ subscriptionLeadProducts[0].Id +'"}';// "trial_period": "P1D","no_trial": false,"no_setup_fee": true,"amount_incl_vat": true,
         System.debug('SubscriptionRequestBodyWith0Amount-->'+JSON.serialize(requestBody));
         return requestBody;
     }
@@ -217,14 +237,13 @@ public with sharing class PS_PaymentUtility {
     */ 
     public static String buildCustomerRequestBodyFromOrder(List<Order> OrderList){
         //String body = '';
-        ReepayTestingConfiguration__c testConfigurations = ReepayTestingConfiguration__c.getOrgDefaults();
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         customerWrapper.email = OrderList[0].Account.PersonEmail;
         customerWrapper.city = OrderList[0].ShippingCity;
         customerWrapper.country = getCountryCodeFromMarketUnit(OrderList[0].Account.Market_Unit__c);
         customerWrapper.phone = OrderList[0].Account.Phone;
         customerWrapper.handle = OrderList[0].Account.PersonEmail;
-        customerWrapper.test = testConfigurations.Use_test_account__c;// For now true
+        customerWrapper.test = shouldUseTestMode(); // Dynamic based on org - false for production, true for sandboxes
         customerWrapper.postal_code = OrderList[0].ShippingPostalCode;
         customerWrapper.first_name = OrderList[0].Account.Name;
         customerWrapper.last_name = OrderList[0].Account.Name;
@@ -235,14 +254,13 @@ public with sharing class PS_PaymentUtility {
     //Changes DFJ-80 Starts
     public static String buildCustomerRequestBodyFromAccount(List<Account> accountList){
         //String body = '';
-        ReepayTestingConfiguration__c testConfigurations = ReepayTestingConfiguration__c.getOrgDefaults();
         PS_PaymentUtility.CustomerWrapper customerWrapper = new PS_PaymentUtility.CustomerWrapper();
         customerWrapper.email = accountList[0].PersonEmail;
         customerWrapper.city = accountList[0].ShippingCity;
         customerWrapper.country = getCountryCodeFromMarketUnit(accountList[0].Market_Unit__c);
         customerWrapper.phone = accountList[0].Phone;
         customerWrapper.handle = accountList[0].PersonEmail;
-        customerWrapper.test = testConfigurations.Use_test_account__c;// For now true
+        customerWrapper.test = shouldUseTestMode(); // Dynamic based on org - false for production, true for sandboxes
         customerWrapper.postal_code = accountList[0].ShippingPostalCode;
         customerWrapper.first_name = accountList[0].Name;
         customerWrapper.last_name = accountList[0].Name;
@@ -353,6 +371,7 @@ public with sharing class PS_PaymentUtility {
         invoiceWrapperInstance.billing_address = billInfo;
         invoiceWrapperInstance.handle = payment.Id;
         invoiceWrapperInstance.order_lines = paymentOrderItems;
+        invoiceWrapperInstance.test = shouldUseTestMode(); // Dynamic based on org - false for production, true for sandboxes
         System.debug('invoiceWrapperInstance-->'+JSON.serialize(invoiceWrapperInstance));
         return JSON.serialize(invoiceWrapperInstance);
     }
@@ -506,6 +525,7 @@ public with sharing class PS_PaymentUtility {
         public String handle;
         public List<PaymentOrderLineWrapper> order_lines;
         public BillingInfo billing_address;
+        public Boolean test; // Added for sandbox/test mode support
     }
 
     public class BillingInfo{

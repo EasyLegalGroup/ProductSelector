@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Block_PersonAcc_EventOrLecture</fullName>
+    <active>true</active>
+    <description>Prevents creation of Event Booking or Association Lecture opportunities when the related Account is a Person Account.</description>
+    <errorConditionFormula>AND(
+    Account.IsPersonAccount,
+    OR(
+        $RecordType.DeveloperName = &quot;Event_Booking&quot;,
+        $RecordType.DeveloperName = &quot;Association_Lecture&quot;
+    )
+)</errorConditionFormula>
+    <errorMessage>Person Accounts can’t use the Event Booking or Association Lecture record types.</errorMessage>
+</ValidationRule>

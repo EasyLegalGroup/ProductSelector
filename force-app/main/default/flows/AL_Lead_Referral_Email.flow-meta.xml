@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>ReferralEmailWithPersonalisedCalendlyLink</name>
+        <label>Send Referral Email with Personalised Calendly Link</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>emailSimple</actionName>
+        <actionType>emailSimple</actionType>
+        <connector>
+            <targetReference>Set_IsSuccess_to_True</targetReference>
+        </connector>
+        <faultConnector>
+            <targetReference>Populate_Custom_Error_with_Flow_Fault_Message</targetReference>
+        </faultConnector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>emailAddresses</name>
+            <value>
+                <elementReference>inputLead.Email</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>composeEmailContent</name>
+            <value>
+                <stringValue>True</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailSubject</name>
+            <value>
+                <elementReference>ptEmailSubject</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailBody</name>
+            <value>
+                <inputConfiguratorMode>Custom</inputConfiguratorMode>
+                <stringValue>&lt;p&gt;{!rtEmailBody}&lt;/p&gt;</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>sendRichBody</name>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recipientId</name>
+        </inputParameters>
+        <nameSegment>emailSimple</nameSegment>
+        <offset>0</offset>
+        <versionString>1.0.1</versionString>
+    </actionCalls>
+    <apiVersion>64.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Assign_Greeting_to_Variable</name>
+        <label>Assign Greeting to Variable</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>Greeting</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>SetGreetings</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>ReferralEmailWithPersonalisedCalendlyLink</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Populate_Custom_Error_with_Flow_Fault_Message</name>
+        <label>Populate Custom Error with Flow Fault Message</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>CustomError</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.FaultMessage</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>IsSuccess</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
+        <name>Set_IsSuccess_to_True</name>
+        <label>Set IsSuccess to True</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>IsSuccess</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <environments>Default</environments>
+    <formulas>
+        <name>SetGreetings</name>
+        <dataType>String</dataType>
+        <expression>IF( 
+AND( NOT(ISBLANK({!Person2Name})), 
+NOT(ISBLANK({!Person2Name})) ), 
+&quot;Kære &quot; &amp; {!Person1Name} &amp; &quot; og &quot; &amp; {!Person2Name} &amp; &quot;,&quot;, 
+&quot;Kære &quot; &amp; {!Person1Name})</expression>
+    </formulas>
+    <formulas>
+        <name>TxtPossessive</name>
+        <dataType>String</dataType>
+        <expression>IF(NOT(ISBLANK({!Person2Name})), &quot;jeres&quot;, &quot;dine&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>TxtPronoun</name>
+        <dataType>String</dataType>
+        <expression>IF(
+  NOT(ISBLANK({!Person2Name})),
+  &quot;I&quot;,  /* plural */
+  &quot;du&quot;  /* singular */
+)</expression>
+    </formulas>
+    <interviewLabel>AL - Lead: Referral Email {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>AL - Lead: Referral Email</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <runInMode>SystemModeWithoutSharing</runInMode>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Assign_Greeting_to_Variable</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <textTemplates>
+        <name>ptEmailSubject</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>Gavekort 1000kr + Familietjek - Din Familiejurist ApS</text>
+    </textTemplates>
+    <textTemplates>
+        <description>{!inputLead.Owner_s_Calendly_Link__c}?utm_content=reference&amp;utm_term={!inputLead.Id}</description>
+        <name>rtEmailBody</name>
+        <isViewedAsPlainText>false</isViewedAsPlainText>
+        <text>&lt;p&gt;{!Greeting},&lt;/p&gt;&lt;p&gt;Tusind tak for et behageligt møde, og tak for den tillid som {!TxtPronoun} har vist mig.&lt;/p&gt;&lt;p&gt;Som lovet, så får {!TxtPronoun} her 2 separate &lt;strong&gt;gavekort &lt;/strong&gt;som {!TxtPronoun} kan videresende og glæde {!TxtPossessive} nærmeste med.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Et gavekort indeholder:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;✔️&amp;nbsp;1 times gratis og uforpligtende rådgivning.&lt;/p&gt;&lt;p&gt;✔️&amp;nbsp;1.000 kr. i rabat på den rette løsning.&lt;/p&gt;&lt;p&gt;✔️&amp;nbsp;Fleksibelt møde - online eller via telefon.&lt;/p&gt;&lt;p&gt;🕒 &lt;strong&gt;Gyldighedsperiode&lt;/strong&gt;: Dette gavekort er gyldigt i 30 dage fra dags dato. Efter denne periode vil linket til booking ikke længere være aktivt.&lt;/p&gt;&lt;p&gt;___________________________________________________________________________________&lt;/p&gt;&lt;p&gt;📅 Via linket herunder kan man reservere den ønskede tid, der må passe – nemt og sikkert.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;{!inputLead.Owner_s_Calendly_Link__c}?utm_content=reference&amp;amp;utm_term={!inputLead.Id}&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;&lt;strong&gt;Klik hér for at booke en aftale med &lt;/strong&gt;&lt;/a&gt;&lt;strong&gt; &lt;/strong&gt;&lt;strong style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;{!inputLead.Owner:User.FirstName}&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;{!txtEmailBodyFooter}&lt;/p&gt;&lt;p&gt;Jeg vil se frem til at tale med {!TxtPossessive} nærmeste&lt;/p&gt;&lt;p&gt;{!txtEmailTitleFooter}&lt;/p&gt;&lt;p&gt;{!txtBodyConfidentialityClause}&lt;/p&gt;</text>
+    </textTemplates>
+    <textTemplates>
+        <description>Confidentiality Clause for Emails</description>
+        <name>txtBodyConfidentialityClause</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>&lt;div class=&quot;dfj-signature&quot; style=&quot;display:flex; align-items:center; gap:16px; padding:16px; border-top:1px solid #ddd; max-width:700px;&quot;&gt;
+  &lt;!-- Logo --&gt;
+  &lt;div style=&quot;flex-shrink:0;&quot;&gt;
+    &lt;img src=&quot;https://dfj.file.force.com/sfc/dist/version/renditionDownload?rendition=ORIGINAL_Png&amp;amp;versionId=068W500000YUk3Y&amp;amp;operationContext=DELIVERY&amp;amp;contentId=05TW500000dyrMi&amp;amp;page=0&amp;amp;d=/a/W5000006o7cL/fm85KpObmVt5R98u8bBV2xcqg9ljemMmljJ5_Fh_VgA&amp;amp;oid=00DG500000CpwKn&amp;amp;dpt=null&amp;amp;viewId=&quot;
+         alt=&quot;Din Familiejurist&quot;
+         width=&quot;180&quot;
+         style=&quot;max-width:100%; height:auto; border:0;&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Text Section --&gt;
+  &lt;div style=&quot;font-family:&apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif; font-size:14px; color:#181818; line-height:1.5;&quot;&gt;
+    &lt;p style=&quot;margin:0; font-size:15px;&quot;&gt;
+      &lt;strong&gt;Din Familiejurist ApS&lt;/strong&gt;
+    &lt;/p&gt;
+    &lt;p style=&quot;margin:4px 0 0 0;&quot;&gt;
+      &lt;a href=&quot;mailto:info@dinfamiliejurist.dk&quot; style=&quot;color:#0b5cab; text-decoration:none;&quot;&gt;info@dinfamiliejurist.dk&lt;/a&gt;&lt;br&gt;
+      &lt;a href=&quot;https://dinfamiliejurist.dk&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot; style=&quot;color:#0b5cab; text-decoration:none;&quot;&gt;www.dinfamiliejurist.dk&lt;/a&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Confidentiality Notice --&gt;
+&lt;div style=&quot;font-family:&apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif; font-size:12px; color:#555; margin-top:16px; max-width:700px; line-height:1.4;&quot;&gt;
+  &lt;strong&gt;CONFIDENTIALITY&lt;/strong&gt;&lt;br&gt;
+  This message and any attachment are confidential and may be privileged or otherwise protected from disclosure.
+  If you are not the intended recipient, please notify Din Familiejurist ApS immediately by replying to the email
+  and then delete the message and any attachment from your system.
+&lt;/div&gt;
+
+&lt;style&gt;
+  @media (max-width: 600px) {
+    .dfj-signature {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+&lt;/style&gt;</text>
+    </textTemplates>
+    <textTemplates>
+        <name>txtEmailBodyFooter</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>&lt;div class=&quot;dfj-box&quot; style=&quot;display:flex; align-items:center; border:1px solid #ddd; padding:16px; border-radius:8px; max-width:650px; gap:20px;&quot;&gt;
+  &lt;div style=&quot;flex-shrink:0;&quot;&gt;
+    &lt;img src=&quot;https://dfj.file.force.com/sfc/dist/version/renditionDownload?rendition=ORIGINAL_Png&amp;amp;versionId=068W500000YUk3Y&amp;amp;operationContext=DELIVERY&amp;amp;contentId=05TW500000dyrMi&amp;amp;page=0&amp;amp;d=/a/W5000006o7cL/fm85KpObmVt5R98u8bBV2xcqg9ljemMmljJ5_Fh_VgA&amp;amp;oid=00DG500000CpwKn&amp;amp;dpt=null&amp;amp;viewId=&quot; 
+         alt=&quot;DFJ Logo&quot; width=&quot;195&quot; height=&quot;88&quot; style=&quot;max-width:100%; height:auto; border:0;&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div style=&quot;font-family:&apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif; font-size:15px; color:#181818;&quot;&gt;
+    &lt;p style=&quot;margin:0 0 8px 0;&quot;&gt;
+    &lt;a href=&quot;{!inputLead.Owner_s_Calendly_Link__c}?utm_content=reference&amp;utm_term={!inputLead.Id}&quot;&gt;Book en aftale om et personligt møde&lt;/a&gt; 
+
+      &lt;strong&gt; – &lt;strong&gt;{!inputLead.Owner:User.FirstName}&lt;/strong&gt;&lt;/strong&gt;&lt;strong&gt; &lt;strong&gt;{!inputLead.Owner:User.LastName}&lt;/strong&gt;&lt;/strong&gt;
+    &lt;/p&gt;
+    &lt;p style=&quot;margin:0;&quot;&gt;
+      Her kan du booke en aftale om personlig rådgivning – helt gratis og uforpligtende. 
+      &lt;a href=&quot;https://calendly.com/dfj-raadgivning/foredrag-1000kr-rabat&quot; 
+         target=&quot;_blank&quot; 
+         rel=&quot;noopener noreferrer&quot;
+         style=&quot;color:#0b5cab; font-weight:600; text-decoration:underline;&quot;&gt;
+         Calendly.com
+      &lt;/a&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+  /* Responsive behavior for mobile */
+  @media (max-width: 600px) {
+    .dfj-box {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+&lt;/style&gt;</text>
+    </textTemplates>
+    <textTemplates>
+        <name>txtEmailTitleFooter</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>&lt;p style=&quot;font-style:italic;&quot;&gt;Med venlig hilsen&lt;br&gt;
+  {!inputLead.Owner:User.FirstName} {!inputLead.Owner:User.LastName}&lt;br&gt;
+  {!inputLead.Owner:User.Title}&lt;br&gt;
+  &lt;strong&gt;Direct:&lt;/strong&gt; {!inputLead.Owner:User.Phone}&lt;br&gt;
+  &lt;strong&gt;Kundeservice:&lt;/strong&gt; +45 70 30 55 70&lt;br&gt;
+International House | Center Boulevard 5 | DK-2300 Copenhagen&lt;br&gt;&lt;br&gt;
+&lt;/p&gt;</text>
+    </textTemplates>
+    <variables>
+        <name>CustomError</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>Greeting</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>inputLead</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Lead</objectType>
+    </variables>
+    <variables>
+        <name>IsSuccess</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <value>
+            <booleanValue>false</booleanValue>
+        </value>
+    </variables>
+    <variables>
+        <name>Person1Name</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>Person2Name</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

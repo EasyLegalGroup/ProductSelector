@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Assign_MobilePhone_to_Variable</name>
+        <label>Assign MobilePhone to Variable</label>
+        <locationX>314</locationX>
+        <locationY>395</locationY>
+        <assignmentItems>
+            <assignToReference>UpdatedPhone</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>frmMobilePhoneFormatted</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Update_Lead</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Phone_to_Variable</name>
+        <label>Assign Phone to Variable</label>
+        <locationX>50</locationX>
+        <locationY>395</locationY>
+        <assignmentItems>
+            <assignToReference>UpdatedPhone</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>frmPhoneFormatted</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Update_Lead</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Which_Field_was_Changed</name>
+        <label>Which Field was Changed?</label>
+        <locationX>314</locationX>
+        <locationY>287</locationY>
+        <defaultConnector>
+            <isGoTo>true</isGoTo>
+            <targetReference>Assign_Phone_to_Variable</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Phone_was_Changed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Phone</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_Phone_to_Variable</targetReference>
+            </connector>
+            <label>Phone was Changed</label>
+        </rules>
+        <rules>
+            <name>MobilePhone_was_Changed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.MobilePhone</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_MobilePhone_to_Variable</targetReference>
+            </connector>
+            <label>MobilePhone was Changed</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>frmMobilePhoneFormatted</name>
+        <dataType>String</dataType>
+        <expression>IF( 
+    BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+45&apos;), 
+    SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+    IF(
+        BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;45&apos;), 
+        &apos;+&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+        IF(
+            AND(
+                NOT(BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+45&apos;)), 
+                OR( 
+                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;DFJ_DK&apos;), 
+                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;Testamente_DK&apos;)
+                )
+            ), 
+            &apos;+45&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+            IF(
+                AND(
+                    NOT(BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+&apos;)), 
+                    OR( 
+                        ISPICKVAL({!$Record.Market_Unit__c}, &apos;DFJ_DK&apos;), 
+                        ISPICKVAL({!$Record.Market_Unit__c}, &apos;Testamente_DK&apos;)
+                    )
+                ), 
+                &apos;+&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+                IF(
+                    BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+46&apos;), 
+                    SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+                    IF(
+                        BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;46&apos;), 
+                        &apos;+&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+                        IF(
+                            AND(
+                                NOT(BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+46&apos;)), 
+                                ISPICKVAL({!$Record.Market_Unit__c}, &apos;FA_SE&apos;)
+                            ), 
+                            &apos;+46&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+                            IF(
+                                AND(
+                                    NOT(BEGINS(SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;), &apos;+&apos;)), 
+                                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;FA_SE&apos;)
+                                ), 
+                                &apos;+&apos; + SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;),
+                                SUBSTITUTE({!$Record.MobilePhone} , &quot; &quot;, &quot;&quot;)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)</expression>
+    </formulas>
+    <formulas>
+        <name>frmPhoneFormatted</name>
+        <dataType>String</dataType>
+        <expression>IF( 
+    BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+45&apos;), 
+    SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+    IF(
+        BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;45&apos;), 
+        &apos;+&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+        IF(
+            AND(
+                NOT(BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+45&apos;)), 
+                OR( 
+                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;DFJ_DK&apos;), 
+                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;Testamente_DK&apos;)
+                )
+            ), 
+            &apos;+45&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+            IF(
+                AND(
+                    NOT(BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+&apos;)), 
+                    OR( 
+                        ISPICKVAL({!$Record.Market_Unit__c}, &apos;DFJ_DK&apos;), 
+                        ISPICKVAL({!$Record.Market_Unit__c}, &apos;Testamente_DK&apos;)
+                    )
+                ), 
+                &apos;+&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+                IF(
+                    BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+46&apos;), 
+                    SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+                    IF(
+                        BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;46&apos;), 
+                        &apos;+&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+                        IF(
+                            AND(
+                                NOT(BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+46&apos;)), 
+                                ISPICKVAL({!$Record.Market_Unit__c}, &apos;FA_SE&apos;)
+                            ), 
+                            &apos;+46&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+                            IF(
+                                AND(
+                                    NOT(BEGINS(SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;), &apos;+&apos;)), 
+                                    ISPICKVAL({!$Record.Market_Unit__c}, &apos;FA_SE&apos;)
+                                ), 
+                                &apos;+&apos; + SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;),
+                                SUBSTITUTE({!$Record.Phone} , &quot; &quot;, &quot;&quot;)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)</expression>
+    </formulas>
+    <interviewLabel>RT - Lead: Set FormattedPhone in Phone and MobilePhone {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>RT - Lead: Sync Mobile and Phone, when either is updated</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Lead</name>
+        <label>Update Lead</label>
+        <locationX>314</locationX>
+        <locationY>587</locationY>
+        <inputAssignments>
+            <field>MobilePhone</field>
+            <value>
+                <elementReference>UpdatedPhone</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Phone</field>
+            <value>
+                <elementReference>UpdatedPhone</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>188</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Which_Field_was_Changed</targetReference>
+        </connector>
+        <filterLogic>or</filterLogic>
+        <filters>
+            <field>Phone</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <filters>
+            <field>MobilePhone</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <filters>
+            <field>CVR__c</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Lead</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Obsolete</status>
+    <variables>
+        <name>UpdatedPhone</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Din Familiejurist</label>
+    <protected>false</protected>
+    <values>
+        <field>Custom_Permission__c</field>
+        <value xsi:type="xsd:string">PriceBook_Din_Familiejurist</value>
+    </values>
+    <values>
+        <field>Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl8wNjY1M2M0NWNlMDFiZjVjODlhY2ExY2Q3YTU3MDc1NTo=</value>
+    </values>
+    <values>
+        <field>Internal_Identifier__c</field>
+        <value xsi:type="xsd:string">Din_Familiejurist</value>
+    </values>
+</CustomMetadata>
