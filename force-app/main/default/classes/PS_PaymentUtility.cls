@@ -282,6 +282,7 @@ public with sharing class PS_PaymentUtility {
 
         List<PaymentOrderLineWrapper> paymentOrderItems = new List<PaymentOrderLineWrapper>();
         Integer count = 0;
+        Decimal totalProductAmount = 0; // Track total product amount for discount capping
         for (Payment_order_line__c polLoop : paymentOrderLines) {
 
 
@@ -291,7 +292,7 @@ public with sharing class PS_PaymentUtility {
             singlePaymentOrderItem.quantity = polLoop.Quantity__c;
             singlePaymentOrderItem.ordertext = polLoop.Name;
             paymentOrderItems.add(singlePaymentOrderItem);
-           
+            totalProductAmount += (polLoop.Amount__c * polLoop.Quantity__c); // Add to total
         }
 
 
@@ -316,11 +317,13 @@ public with sharing class PS_PaymentUtility {
                     String sObjectTypeName = getSobjectTypeFromRecordId_Apex(recordIdOfsubscriptionProduct);
 
                     if (sObjectTypeName.equals('OpportunityLineItem')) {
-                        singlePaymentOrderItem.amount = (Decimal) subscriptionProduct.get('TotalPrice') * 100;
+                        Decimal totalPrice = (Decimal) subscriptionProduct.get('TotalPrice');
+                        singlePaymentOrderItem.amount = totalPrice * 100;
                         singlePaymentOrderItem.quantity = (Decimal) subscriptionProduct.get('Quantity');
                         singlePaymentOrderItem.ordertext = (String) subscriptionProduct.get('Name');
 
                         paymentOrderItems.add(singlePaymentOrderItem);
+                        totalProductAmount += totalPrice; // Add to total
                     }
                 }
 
@@ -331,12 +334,13 @@ public with sharing class PS_PaymentUtility {
                     if (String.isNotBlank(payment.Lead__c)) {
                         //  singlePaymentOrderItem.amount = 0;
                         //DFJ-191
-
-                        singlePaymentOrderItem.amount = (Decimal) subscriptionProduct.get('Sub_Total__c') * 100;
+                        Decimal subTotal = (Decimal) subscriptionProduct.get('Sub_Total__c');
+                        singlePaymentOrderItem.amount = subTotal * 100;
                         //End
                         singlePaymentOrderItem.quantity = (Decimal) subscriptionProduct.get('Quantity__c');
                         singlePaymentOrderItem.ordertext = (String) subscriptionProduct.get('Product_Name__c');
                         paymentOrderItems.add(singlePaymentOrderItem);
+                        totalProductAmount += subTotal; // Add to total
                     }
                 }
             }
@@ -344,7 +348,13 @@ public with sharing class PS_PaymentUtility {
 
         if(payment.Fixed_discount_Type__c > 0){
             PaymentOrderLineWrapper singlePaymentItem = new PaymentOrderLineWrapper();
-            singlePaymentItem.amount = payment.Fixed_discount_Type__c * 100 * (-1);
+            // Cap the discount to not exceed the total product amount (prevent negative invoice)
+            Decimal discountAmount = payment.Fixed_discount_Type__c;
+            if (discountAmount > totalProductAmount) {
+                System.debug('Discount (' + discountAmount + ') exceeds total product amount (' + totalProductAmount + '). Capping discount to product total.');
+                discountAmount = totalProductAmount;
+            }
+            singlePaymentItem.amount = discountAmount * 100 * (-1);
             singlePaymentItem.quantity = 1 ;
             singlePaymentItem.ordertext = 'Discount';
             paymentOrderItems.add(singlePaymentItem);
@@ -510,6 +520,8 @@ public with sharing class PS_PaymentUtility {
         @AuraEnabled public String first_name;
         @AuraEnabled public String last_name;
         @AuraEnabled public Boolean generate_handle;
+        // Added to detect deleted customers in Reepay
+        @AuraEnabled public String deleted;
     }
 
     public class CustomerResponseWrapper{

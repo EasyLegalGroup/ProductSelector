@@ -32,35 +32,63 @@ public with sharing class DFJ_PaymentController {
 
     /**
      * @description Gets the Reepay private key based on the Pricebook's Internal_Identifier__c.
+     *              Returns the test key when not in production org (00D1t000000w9f2).
      * @param pricebookId The Pricebook2 Id to lookup the configuration for
      * @return The Base64 encoded private key for Reepay API authentication
      */
     public static String getReepayPrivateKeyByPricebook(Id pricebookId) {
+        System.debug('=== getReepayPrivateKeyByPricebook START ===');
+        System.debug('PricebookId received: ' + pricebookId);
+        System.debug('Current Org ID: ' + UserInfo.getOrganizationId());
+        System.debug('Production Org ID: ' + PS_PaymentUtility.PRODUCTION_ORG_ID);
+        System.debug('isProductionOrg: ' + PS_PaymentUtility.isProductionOrg());
+        System.debug('shouldUseTestMode: ' + PS_PaymentUtility.shouldUseTestMode());
+        
         // In test context, return the test private key if set
         if (Test.isRunningTest() && testPrivateKey != null) {
+            System.debug('Returning test context key');
             return testPrivateKey;
         }
         
         if (pricebookId == null) {
+            System.debug('ERROR: pricebookId is null');
             throw new AuraHandledException('Pricebook is required for payment processing.');
         }
         
         List<Pricebook2> pricebooks = [SELECT Id, Internal_Identifier__c, Name FROM Pricebook2 WHERE Id = :pricebookId LIMIT 1];
+        System.debug('Pricebook query result: ' + pricebooks);
         if (pricebooks.isEmpty() || String.isBlank(pricebooks[0].Internal_Identifier__c)) {
+            System.debug('ERROR: Pricebook not found or missing Internal_Identifier__c');
             throw new AuraHandledException('Pricebook not found or missing Internal Identifier.');
         }
+        System.debug('Pricebook Name: ' + pricebooks[0].Name);
+        System.debug('Internal_Identifier__c: ' + pricebooks[0].Internal_Identifier__c);
         
         List<Price_Book__mdt> priceBookConfigs = [
-            SELECT Encoded_Private_Key__c 
+            SELECT Encoded_Private_Key__c, Test_Encoded_Private_Key__c, Internal_Identifier__c 
             FROM Price_Book__mdt 
             WHERE Internal_Identifier__c = :pricebooks[0].Internal_Identifier__c 
             LIMIT 1
         ];
+        System.debug('Price_Book__mdt query result count: ' + priceBookConfigs.size());
         
         if (priceBookConfigs.isEmpty() || String.isBlank(priceBookConfigs[0].Encoded_Private_Key__c)) {
+            System.debug('ERROR: Price_Book__mdt config not found or missing Encoded_Private_Key__c');
             throw new AuraHandledException('Reepay configuration not found for Pricebook: ' + pricebooks[0].Name);
         }
         
+        System.debug('Has Encoded_Private_Key__c: ' + String.isNotBlank(priceBookConfigs[0].Encoded_Private_Key__c));
+        System.debug('Has Test_Encoded_Private_Key__c: ' + String.isNotBlank(priceBookConfigs[0].Test_Encoded_Private_Key__c));
+        
+        // Return test key when not in production, otherwise return production key
+        if (PS_PaymentUtility.shouldUseTestMode() && String.isNotBlank(priceBookConfigs[0].Test_Encoded_Private_Key__c)) {
+            System.debug('>>> USING TEST KEY for Reepay API <<<');
+            System.debug('=== getReepayPrivateKeyByPricebook END (test key) ===');
+            return priceBookConfigs[0].Test_Encoded_Private_Key__c;
+        }
+        
+        System.debug('>>> USING PRODUCTION KEY for Reepay API <<<');
+        System.debug('=== getReepayPrivateKeyByPricebook END (prod key) ===');
         return priceBookConfigs[0].Encoded_Private_Key__c;
     }
     
@@ -360,7 +388,7 @@ public class CustomerResponseWrapper{
             else if (sObjectType.equalsIgnoreCase('Opportunity')) {
                 String oppCondition = 'Id = \'' + recordId + '\'';
                 List<String> oppFieldList = new List<String>{
-                        'Id', 'AccountId', 'Opportunity_Total__c', 'Fixed_Discount_Type__c'
+                        'Id', 'AccountId', 'Opportunity_Total__c', 'Fixed_Discount_Type__c', 'Pricebook2Id'
                 };
 
                 currentOpportunity = PS_PaymentUtility.fetchRecordsDynamically(oppCondition, oppFieldList, sObjectType);
@@ -540,6 +568,7 @@ public class CustomerResponseWrapper{
 
             Payments__c paymentRecord = new Payments__c();
             paymentRecord.Opportunity__c = currOppId;
+            paymentRecord.Pricebook2Id__c = currentOpp[0].Pricebook2Id;
 
             if (String.isBlank(paymentCurrency)) {
                 paymentCurrency = (!accountRelatedToOpportunity.isEmpty()) ?
@@ -874,20 +903,23 @@ public class CustomerResponseWrapper{
                             currentOrder[0].Account.PersonEmail :
                             (sObjectType.equalsIgnoreCase('Account') || sObjectType.equalsIgnoreCase('Opportunity')) ?
                                     currentAccount[0].PersonEmail : '',
-                    paymentOrder.CurrencyISOCode
+                    paymentOrder.Pricebook2Id__c
             );
             // End
 
             if (customerPresentString.contains('Error :')) {
                 paymentRelatedWrapperInstance.errorMessage = customerPresentString;
                 return paymentRelatedWrapperInstance;
-            } else if (customerPresentString.equalsIgnoreCase('Not found')) {
-                // createCustomer
+            } else if (customerPresentString.equalsIgnoreCase('Not found') || customerPresentString.equalsIgnoreCase('Deleted')) {
+                // createCustomer - also recreate if customer was deleted in Reepay
+                if (customerPresentString.equalsIgnoreCase('Deleted')) {
+                    System.debug('Customer was deleted in Reepay - will recreate with same handle');
+                }
                 PS_PaymentUtility.CustomerResponseWrapper responseWrapperIns = new PS_PaymentUtility.CustomerResponseWrapper();
                 List<Payment_order_line__c> paymentOrderItems = new List<Payment_order_line__c>();
                 paymentOrderItems = (List<Payment_order_line__c>) JSON.deserialize(paymentOrderLines, List<Payment_order_line__c>.class);
                 // Changes DFJ-80 :: Added param currentAccount in createReepayCustomer class
-                PS_PaymentUtility.CustomerResponseWrapper isCustomerCreated = createReepayCustomer(currentAccount, currentLead, currentOrder, paymentOrder.CurrencyIsoCode, sObjectType);
+                PS_PaymentUtility.CustomerResponseWrapper isCustomerCreated = createReepayCustomer(currentAccount, currentLead, currentOrder, paymentOrder.Pricebook2Id__c, sObjectType);
                 if (String.isNotBlank(isCustomerCreated.error)) {
                     paymentRelatedWrapperInstance.errorMessage = isCustomerCreated.error;
                     return paymentRelatedWrapperInstance;
@@ -955,7 +987,7 @@ public class CustomerResponseWrapper{
      /*
     * @Description  method to check for the customer record .
     * @Param        recordId
-    * @Return       String
+    * @Return       String - 'Found', 'Not Found', 'Deleted', or 'Error: ...'
     */
      public static String checkCustomerAlreadyCreated(String currentEmail, Id pricebookId) {
         String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
@@ -974,6 +1006,16 @@ public class CustomerResponseWrapper{
         HttpResponse response = http.send(request);
 
         if ((response.getStatusCode() == 200 && !String.isBlank(response.getBody()))) {
+            // Check if customer is deleted - if so, treat as Not Found so it will be recreated
+            try {
+                PS_PaymentUtility.CustomerWrapper existingCustomer = (PS_PaymentUtility.CustomerWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerWrapper.class);
+                if (String.isNotBlank(existingCustomer.deleted)) {
+                    System.debug('Customer exists but is deleted (deleted: ' + existingCustomer.deleted + '). Will recreate.');
+                    return 'Deleted';
+                }
+            } catch (Exception e) {
+                System.debug('Error parsing customer response: ' + e.getMessage());
+            }
             return 'Found';
         } else if (response.getStatusCode() == 404 && !String.isBlank(response.getBody())) {
             PS_PaymentUtility.CustomerResponseWrapper customerResponse = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
@@ -989,9 +1031,19 @@ public class CustomerResponseWrapper{
     * @Return       String
     */
      public static PS_PaymentUtility.CustomerResponseWrapper createReepayCustomer(List<Account> currentAccount, List<Lead> currentLead, List<Order> currentOrder, Id pricebookId, String sObjectType) {
+        System.debug('=== createReepayCustomer START ===');
+        System.debug('sObjectType: ' + sObjectType);
+        System.debug('pricebookId: ' + pricebookId);
+        System.debug('currentLead: ' + (currentLead != null && !currentLead.isEmpty() ? currentLead[0].Id : 'null/empty'));
+        System.debug('currentAccount: ' + (currentAccount != null && !currentAccount.isEmpty() ? currentAccount[0].Id : 'null/empty'));
+        System.debug('currentOrder: ' + (currentOrder != null && !currentOrder.isEmpty() ? currentOrder[0].Id : 'null/empty'));
+        
         PS_PaymentUtility.CustomerResponseWrapper customerResponseWrapperInstance = new PS_PaymentUtility.CustomerResponseWrapper();
         String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
+        System.debug('Got Reepay private key (first 20 chars): ' + (reepayPrivateKey != null ? reepayPrivateKey.substring(0, Math.min(20, reepayPrivateKey.length())) + '...' : 'null'));
+        
         String endpointUrl = customerCreationURL;
+        System.debug('Endpoint URL: ' + endpointUrl);
         // Changes DFJ-80 :: Added class buildCustomerRequestBodyFromAccount to created request body
 
         // Changes for DFJ-273
@@ -1003,6 +1055,7 @@ public class CustomerResponseWrapper{
                         (sObjectType.equalsIgnoreCase('Account') || sObjectType.equalsIgnoreCase('Opportunity')) ? PS_PaymentUtility.buildCustomerRequestBodyFromAccount(currentAccount) : '';
 
         // End
+        System.debug('Request Body: ' + requestBody);
 
         HttpRequest request = new HttpRequest();
         // String requestBody = constructRequestBody();
@@ -1013,8 +1066,12 @@ public class CustomerResponseWrapper{
         request.setHeader('Content-Type', 'application/json');
         request.setTimeout(120000);
         request.setBody(requestBody);
+        
+        System.debug('Sending HTTP request to Reepay...');
         Http http = new Http();
         HttpResponse response = http.send(request);
+        System.debug('Response Status Code: ' + response.getStatusCode());
+        System.debug('Response Body: ' + response.getBody());
         if ((response.getStatusCode() == 200 || response.getStatusCode() == 400) && !String.isBlank(response.getBody())) {
             if (response.getStatusCode() == 200) {
                 customerResponseWrapperInstance.message = 'Customer created successfully';

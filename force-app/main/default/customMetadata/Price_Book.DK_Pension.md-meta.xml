@@ -14,4 +14,8 @@
         <field>Internal_Identifier__c</field>
         <value xsi:type="xsd:string">DK_Pension</value>
     </values>
+    <values>
+        <field>Test_Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl8yYjg3Y2MwOTM3OTNiMTNlZWIwYjM2NWEwYjYzZDI3ZDo=</value>
+    </values>
 </CustomMetadata>

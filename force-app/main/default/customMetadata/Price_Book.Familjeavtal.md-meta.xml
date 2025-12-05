@@ -14,4 +14,8 @@
         <field>Internal_Identifier__c</field>
         <value xsi:type="xsd:string">Familjeavtal</value>
     </values>
+    <values>
+        <field>Test_Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl9kNGQ0MDJiZGFmYzQyZmU0ZGM1Y2I3MWYyZTM2MDBlMjo=</value>
+    </values>
 </CustomMetadata>

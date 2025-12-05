@@ -14,4 +14,8 @@
         <field>Internal_Identifier__c</field>
         <value xsi:type="xsd:string">Heres_Law</value>
     </values>
+    <values>
+        <field>Test_Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl83MGRkMzc1OGM1YTFmZDBlNzdjNjFmYWU4NTFiYWQ5Mjo=</value>
+    </values>
 </CustomMetadata>

@@ -14,4 +14,8 @@
         <field>Internal_Identifier__c</field>
         <value xsi:type="xsd:string">Din_Familiejurist</value>
     </values>
+    <values>
+        <field>Test_Encoded_Private_Key__c</field>
+        <value xsi:type="xsd:string">cHJpdl9jZWJlNWI5YTZhOWZlZGEzMzcxMGZmNTMxYzZhZDlmMTo=</value>
+    </values>
 </CustomMetadata>
