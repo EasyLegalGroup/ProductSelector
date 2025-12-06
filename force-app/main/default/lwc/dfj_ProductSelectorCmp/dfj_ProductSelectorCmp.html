@@ -20,101 +20,95 @@
     </template>
     
     <template if:false={hasPermissionError}>
-    <fieldset class="slds-box">
-      <div>
-        <div class="slds-clearfix slds-m-bottom_x-small">
-            <lightning-button 
-                type="button" 
-                class="slds-float_right"
-                variant="destructive-text" 
-                label="Empty Basket" 
-                icon-name="utility:delete" 
-                icon-position="left"
-                onclick={deleteRecord}
-                disabled={isActionButtonsDisabled}>
-            </lightning-button>
-        </div>
-      </div>
-
-      <!-- Start Product Table    -->
-      <table class="slds-table slds-table_cell-buffer slds-table_bordered anotherhover" style="table-layout: fixed;">
-        <thead>
-          <tr class="slds-line-height_reset">
-            <th class="slds-cell-wrap" scope="col" style="width: 40%;">
-              <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Product Name">
-                Product
-              </div>
-            </th>
-            <th class="slds-cell-wrap" scope="col" style="width: 15%;">
-              <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Quantity">
-                Quantity
-              </div>
-            </th>
-            <th class="slds-cell-wrap" scope="col" style="width: 15%;">
-              <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Unit Price">
-                Unit Price
-              </div>
-            </th>
-            <th class="slds-cell-wrap" scope="col" style="width: 15%;">
-              <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Subtotal">
-                Subtotal
-              </div>
-            </th>
-            <th class="slds-cell-wrap" scope="col" style="width: 15%;">
-              <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Action">
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="">
-          <template if:false={isProductAvailable}>
-            <tr class="slds-hint-parent public_fixedDataTableCell_main">
-              <th scope="row" colspan="5" class="slds-cell-wrap">
-                <div class="slds-truncate slds-text-align_center slds-text-heading_medium">
-                  There are no active product selected
+    <fieldset class="slds-box product-fieldset">
+      <!-- Start Product Table - Modern Design -->
+      <div class="product-table-container">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th class="col-product">
+                <div class="header-content">
+                  <lightning-icon icon-name="utility:package" size="xx-small" class="header-icon"></lightning-icon>
+                  <span>Product</span>
+                </div>
+              </th>
+              <th class="col-qty">
+                <div class="header-content header-center">
+                  <span>Qty</span>
+                </div>
+              </th>
+              <th class="col-price">
+                <div class="header-content header-center">
+                  <span>Price</span>
+                </div>
+              </th>
+              <th class="col-subtotal">
+                <div class="header-content header-right">
+                  <span>Subtotal</span>
+                </div>
+              </th>
+              <th class="col-action">
+                <div class="header-content header-right">
+                  <button class="empty-basket-btn" onclick={deleteRecord} disabled={isActionButtonsDisabled} title="Empty Basket">
+                    <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                    <span class="empty-basket-text">Clear All</span>
+                  </button>
                 </div>
               </th>
             </tr>
-          </template>
-          <template if:true={isProductAvailable}>
-            <template for:each={productLineItems} for:item="pro" for:index="tabIndex">
-              <tr key={pro.Id}>
-                <th class="slds-cell-wrap" scope="col">
-                  <div class="slds-truncate slds-text-align_left" title={pro.Name}>
-                    <b>
-                      <lightning-formatted-text value={pro.Name}></lightning-formatted-text>
-                    </b>
+          </thead>
+          <tbody>
+            <template if:false={isProductAvailable}>
+              <tr class="empty-state-row">
+                <td colspan="5">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">
+                      <lightning-icon icon-name="utility:cart" size="large"></lightning-icon>
+                    </div>
+                    <p class="empty-state-text">Your basket is empty</p>
+                    <p class="empty-state-subtext">Add products to get started</p>
                   </div>
-                </th>
-                <th class="slds-cell-wrap" scope="col">
-                  <div align="right" class="slds-truncate slds-text-align_center">
-                    {pro.Quantity}
-                  </div>
-                </th>
-                <th scope="col" class="slds-cell-wrap">
-                  <div class="slds-truncate slds-text-align_center">
-                    <lightning-formatted-number value={pro.UnitPrice} format-style="currency"
-                      currency-code={pro.CurrencyIsoCode} currency-display-as="symbol">
-                    </lightning-formatted-number>
-                  </div>
-                </th>
-                <th class="slds-cell-wrap" scope="col">
-                  <div class="slds-truncate slds-text-align_center">
-                    <lightning-formatted-number value={pro.totalPrice} format-style="currency"
-                      currency-code={pro.CurrencyIsoCode} currency-display-as="symbol">
-                    </lightning-formatted-number>
-                  </div>
-                </th>
-                <th class="slds-truncate slds-text-align_center" scope="col">
-                  <lightning-button-icon icon-name="utility:delete" variant="border" onclick={deleteRecord}
-                    alternative-text="Delete" data-index={tabIndex} disabled={isActionButtonsDisabled}>
-                  </lightning-button-icon>
-                </th>
+                </td>
               </tr>
             </template>
-          </template>
-        </tbody>
-      </table>
+            <template if:true={isProductAvailable}>
+              <template for:each={productLineItems} for:item="pro" for:index="tabIndex">
+                <tr key={pro.Id} class="product-row">
+                  <td class="col-product">
+                    <div class="product-name">
+                      <div class="product-indicator"></div>
+                      <span class="product-title">{pro.Name}</span>
+                    </div>
+                  </td>
+                  <td class="col-qty">
+                    <div class="qty-badge">{pro.Quantity}</div>
+                  </td>
+                  <td class="col-price">
+                    <div class="price-value">
+                      <lightning-formatted-number value={pro.UnitPrice} format-style="currency"
+                        currency-code={pro.CurrencyIsoCode} currency-display-as="symbol">
+                      </lightning-formatted-number>
+                    </div>
+                  </td>
+                  <td class="col-subtotal">
+                    <div class="subtotal-value">
+                      <lightning-formatted-number value={pro.totalPrice} format-style="currency"
+                        currency-code={pro.CurrencyIsoCode} currency-display-as="symbol">
+                      </lightning-formatted-number>
+                    </div>
+                  </td>
+                  <td class="col-action">
+                    <lightning-button-icon icon-name="utility:delete" variant="bare" onclick={deleteRecord}
+                      alternative-text="Delete" data-index={tabIndex} disabled={isActionButtonsDisabled}
+                      class="delete-btn">
+                    </lightning-button-icon>
+                  </td>
+                </tr>
+              </template>
+            </template>
+          </tbody>
+        </table>
+      </div>
       <!-- End Product Table -->
 
 
@@ -206,7 +200,7 @@
         <lightning-layout-item size="6" large-device-size="3" medium-device-size="3" small-device-size="6"
           padding="around-small">
           <!-- Spark  button start -->
-            <button class="slds-m-left_small spark-button" onclick={handleCalculateBundle} disabled={isActionButtonsDisabled}>
+            <button class="spark-button" onclick={handleCalculateBundle} disabled={isActionButtonsDisabled}>
               <svg class="sparkle" viewBox="-60 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z"
@@ -248,73 +242,75 @@
       </lightning-layout> -->
 
 
-      <!-- Start Total Order Value Section -->
+      <!-- Start Total Order Value Section - Premium Design -->
       <template if:true={isShowOrderTotal}>
-        <lightning-layout multiple-rows="true" vertical-align="center">
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Product Total">
-              <strong>Product Total</strong>
+        <div class="order-summary-container">
+          <div class="order-summary-header">
+            <lightning-icon icon-name="utility:summary" size="x-small" class="summary-header-icon"></lightning-icon>
+            <span class="summary-header-text">Order Summary</span>
+          </div>
+          
+          <div class="summary-body">
+            <!-- Product Total Row -->
+            <div class="summary-row summary-row-primary">
+              <div class="summary-label">
+                <lightning-icon icon-name="utility:cart" size="xx-small" class="summary-icon"></lightning-icon>
+                <span>Product Total</span>
+              </div>
+              <div class="summary-value summary-value-primary">
+                <lightning-formatted-number value={total} format-style="currency" currency-code={isoCode}
+                  currency-display-as="symbol"></lightning-formatted-number>
+              </div>
             </div>
-          </lightning-layout-item>
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_right ">
-              <lightning-formatted-number value={total} format-style="currency" currency-code={isoCode}
-                currency-display-as="symbol"></lightning-formatted-number>
+
+            <!-- Discounts Section -->
+            <div class="discounts-section">
+              <div class="summary-row summary-row-discount">
+                <div class="summary-label summary-label-indent">
+                  <lightning-icon icon-name="utility:discount" size="xx-small" class="discount-icon"></lightning-icon>
+                  <span>Product Discounts</span>
+                </div>
+                <div class="summary-value discount-value">
+                  <lightning-formatted-number value={productDiscount} format-style="currency" currency-code={isoCode}
+                    currency-display-as="symbol"></lightning-formatted-number>
+                </div>
+              </div>
+
+              <div class="summary-row summary-row-discount">
+                <div class="summary-label summary-label-indent">
+                  <lightning-icon icon-name="utility:coupon_codes" size="xx-small" class="discount-icon"></lightning-icon>
+                  <span>Discount Codes</span>
+                </div>
+                <div class="summary-value discount-value">
+                  <span class="no-value">—</span>
+                </div>
+              </div>
+
+              <div class="summary-row summary-row-discount">
+                <div class="summary-label summary-label-indent">
+                  <lightning-icon icon-name="utility:percent" size="xx-small" class="discount-icon"></lightning-icon>
+                  <span>Additional Discounts</span>
+                </div>
+                <div class="summary-value discount-value">
+                  <lightning-formatted-number value={fixedDiscountAmount} format-style="currency" currency-code={isoCode}
+                    currency-display-as="symbol"></lightning-formatted-number>
+                </div>
+              </div>
             </div>
-          </lightning-layout-item>
-        </lightning-layout>
-        <lightning-layout multiple-rows="true" vertical-align="center">
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Product Discounts">
-              Product Discounts
+
+            <!-- Total Row - Grand Finale -->
+            <div class="summary-total-row">
+              <div class="summary-label summary-label-total">
+                <lightning-icon icon-name="utility:money" size="x-small" class="total-icon"></lightning-icon>
+                <span>Total</span>
+              </div>
+              <div class="summary-value summary-value-total">
+                <lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode}
+                  currency-display-as="symbol"></lightning-formatted-number>
+              </div>
             </div>
-          </lightning-layout-item>
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_right ">
-              <lightning-formatted-number value={productDiscount} format-style="currency" currency-code={isoCode}
-                currency-display-as="symbol"></lightning-formatted-number>
-            </div>
-          </lightning-layout-item>
-        </lightning-layout>
-        <lightning-layout multiple-rows="true" vertical-align="center">
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Discount Codes">
-              Discount Codes
-            </div>
-          </lightning-layout-item>
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_right ">
-              <!-- <lightning-formatted-number value="" format-style="currency" currency-code={isoCode}
-                currency-display-as="symbol"></lightning-formatted-number> -->
-            </div>
-          </lightning-layout-item>
-        </lightning-layout>
-        <lightning-layout multiple-rows="true" vertical-align="center">
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Additional Discounts">
-              Additional Discounts
-            </div>
-          </lightning-layout-item>
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_right ">
-              <lightning-formatted-number value={fixedDiscountAmount} format-style="currency" currency-code={isoCode}
-                currency-display-as="symbol"></lightning-formatted-number>
-            </div>
-          </lightning-layout-item>
-        </lightning-layout>
-        <lightning-layout multiple-rows="true" vertical-align="center">
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_left slds-p-around_x-small" title="Total">
-              <strong>Total</strong>
-            </div>
-          </lightning-layout-item>
-          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12">
-            <div class="slds-truncate slds-text-align_right ">
-              <lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode}
-                currency-display-as="symbol"></lightning-formatted-number>
-            </div>
-          </lightning-layout-item>
-        </lightning-layout>
+          </div>
+        </div>
       </template>
       <!-- End Total Order Value Section -->
 
@@ -340,139 +336,142 @@
 
 
 
-    <!-- Start Delete Confirmation Modal -->
+    <!-- Start Delete Confirmation Modal - Premium Design -->
     <template if:true={isDeleteConfirmationModalOpen}>
       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
         aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-        <div class="slds-modal__container" style="width:95%">
-          <div class="slds-modal__content slds-p-around_small" id="modal-content-id-2">
-            <lightning-layout multiple-rows="true">
-              <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-ize="12">
-                <div class="slds-align_absolute-center slds-text-heading_medium slds-p-around_medium">
-                  <template if:true={isProductListDelete}>
-                    <p>This action will clear your basket.</p>
-                  </template>
-                  <template if:false={isProductListDelete}>
-                    <p>Are you sure you want to delete this product?</p>
-                  </template>
-                </div>
-              </lightning-layout-item>
-              <div align="right" class="slds-p-around_medium slds-align_absolute-center">
-                <lightning-button class="addSpaceInFooter" type="button" label="Cancel" onclick={closeModal}
-                  variant="neutral" title="cancel" icon-name="utility:close" icon-position="left"></lightning-button>
-                <template if:true={isProductListDelete}>
-                  <lightning-button class="button-gap" variant="brand" label='Empty Basket' title='Empty Basket'
-                    onclick={deleteRecordWhenButtonClicked} icon-name="utility:check" icon-position="left">
-                  </lightning-button>
-                </template>
-                <template if:false={isProductListDelete}>
-                  <lightning-button class="button-gap" variant="brand" label='OK' title='OK' onclick={deleteRecordWhenButtonClicked}
-                    icon-name="utility:check" icon-position="left"></lightning-button>
-                </template>
-              </div>
-            </lightning-layout>
+        <div class="confirm-modal-container">
+          <div class="confirm-modal-icon-wrapper confirm-modal-icon-warning">
+            <lightning-icon icon-name="utility:warning" size="medium"></lightning-icon>
+          </div>
+          <template if:true={isProductListDelete}>
+            <h3 class="confirm-modal-title">Clear Your Basket?</h3>
+            <p class="confirm-modal-subtitle">This will remove all products from your basket. This action cannot be undone.</p>
+          </template>
+          <template if:false={isProductListDelete}>
+            <h3 class="confirm-modal-title">Remove Product?</h3>
+            <p class="confirm-modal-subtitle">Are you sure you want to remove this product from your basket?</p>
+          </template>
+          <div class="confirm-modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick={closeModal}>
+              <span>Keep Items</span>
+            </button>
+            <template if:true={isProductListDelete}>
+              <button class="modal-btn modal-btn-destructive" onclick={deleteRecordWhenButtonClicked}>
+                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                <span>Clear Basket</span>
+              </button>
+            </template>
+            <template if:false={isProductListDelete}>
+              <button class="modal-btn modal-btn-destructive" onclick={deleteRecordWhenButtonClicked}>
+                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                <span>Remove</span>
+              </button>
+            </template>
           </div>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open"></div>
+      <div class="slds-backdrop slds-backdrop_open modal-backdrop"></div>
     </template>
     <!-- End Delete Confirmation Modal -->
-    <!-- Add Product Modal Start -->
+    <!-- Add Product Modal Start - Premium Design -->
     <template if:true={isAddProductModalOpen}>
       <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-03" aria-modal="true"
-        aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open slds-modal_medium">
-        <div class="slds-modal__container" style="width:100%">
-          <header class="slds-modal__header">
-            <template lwc:if={isShowProductsInAddProductModal}>
-              <h2 class="slds-text-heading_medium slds-hyphenate">Add Products</h2>
-            </template>
-            <template lwc:elseif={isPricebookNotSelected}>
-              <h2 class="slds-text-heading_medium slds-hyphenate">Select Pricebook</h2>
-            </template>
-          </header>
-          <div class="slds-modal__content slds-p-around_small bodyHeight" id="modal-content-id-3">
-            <div>
-              <template lwc:if={isShowComboboxToSelectPricebook}>
-                <lightning-combobox label="Select Price Book" value={selectedPriceBookIdUsingCombobox}
-                  disabled={isPricebookSelectionDisabled} placeholder="Choose a Price Book"
-                  options={priceBookOptionsForCombobox} onchange={handleSelectionOfPricebook}>
-                </lightning-combobox>
+        aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open slds-modal_medium premium-modal">
+        <div class="slds-modal__container modal-container-premium">
+          <header class="modal-header-premium">
+            <div class="modal-header-content">
+              <div class="modal-header-icon">
+                <lightning-icon icon-name="utility:add" size="small"></lightning-icon>
+              </div>
+              <template lwc:if={isShowProductsInAddProductModal}>
+                <h2 class="modal-title">Add Products</h2>
+              </template>
+              <template lwc:elseif={isPricebookNotSelected}>
+                <h2 class="modal-title">Select Pricebook</h2>
               </template>
             </div>
+            <button class="modal-close-btn" onclick={closeModal} title="Close">
+              <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+            </button>
+          </header>
+          <div class="modal-body-premium modal-body-large" id="modal-content-id-3">
             <template lwc:if={selectedPriceBookName}>
-              <div class="slds-p-vertical_small slds-border_bottom">
-                <div class="slds-text-heading_medium slds-text-align_center">Selected
-                  pricebook : {selectedPriceBookName}
+              <div class="pricebook-switcher">
+                <div class="pricebook-current">
+                  <lightning-icon icon-name="utility:check" size="xx-small" class="pricebook-check-icon"></lightning-icon>
+                  <span class="pricebook-name">{selectedPriceBookName}</span>
                 </div>
+                <template lwc:if={isShowComboboxToSelectPricebook}>
+                  <lightning-combobox variant="label-hidden" value={selectedPriceBookIdUsingCombobox}
+                    disabled={isPricebookSelectionDisabled} placeholder="Switch Price Book"
+                    options={priceBookOptionsForCombobox} onchange={handleSelectionOfPricebook}
+                    class="pricebook-dropdown">
+                  </lightning-combobox>
+                </template>
+              </div>
+            </template>
+            <template lwc:elseif={isShowComboboxToSelectPricebook}>
+              <div class="pricebook-selector">
+                <lightning-combobox label="Select Price Book" value={selectedPriceBookIdUsingCombobox}
+                  disabled={isPricebookSelectionDisabled} placeholder="Choose a Price Book"
+                  options={priceBookOptionsForCombobox} onchange={handleSelectionOfPricebook}
+                  class="premium-combobox">
+                </lightning-combobox>
               </div>
             </template>
             <template lwc:if={isShowProductsInAddProductModal}>
-              <div>
-                <lightning-layout multiple-rows="true" vertical-align="center" horizontal-align="center">
-                  <lightning-layout-item size="6" padding="around-small">
-                    <div class="slds-truncate slds-text-align_center "><strong>PRODUCT NAME</strong>
-                    </div>
-                  </lightning-layout-item>
-                  <lightning-layout-item size="2" padding="around-small">
-                    <div class="slds-truncate slds-text-align_center "><strong>ITEM PRICE</strong>
-                    </div>
-                  </lightning-layout-item>
-                  <lightning-layout-item size="3" padding="around-small">
-                    <div class="slds-truncate slds-text-align_center"><strong>AMOUNT</strong></div>
-                  </lightning-layout-item>
-                </lightning-layout>
+              <div class="modal-product-list">
+                <!-- Product List Header -->
+                <div class="modal-product-header">
+                  <div class="modal-col-name">Product</div>
+                  <div class="modal-col-price">Price</div>
+                  <div class="modal-col-qty">Quantity</div>
+                </div>
+                <!-- Product Rows -->
                 <template for:each={currentProductList} for:item="proL" for:index="tabIndex">
-                  <div key={proL.Id}>
-                    <lightning-layout multiple-rows="true" vertical-align="center" horizontal-align="center">
-                      <lightning-layout-item size="6" padding="around-small">
-                        <div class="slds-truncate slds-text-align_left">{proL.Name}</div>
-                      </lightning-layout-item>
-                      <lightning-layout-item size="2" padding="around-small">
-                        <div class="slds-truncate slds-text-align_center">
-                          <lightning-formatted-number value={proL.UnitPrice} format-style="currency"
-                            currency-code={proL.Product2.CurrencyIsoCode} currency-display-as="symbol">
-                          </lightning-formatted-number>
-                        </div>
-                      </lightning-layout-item>
-                      <lightning-layout-item size="3" padding="around-small">
-                        <div class="slds-truncate slds-text-align_center">
-                          <lightning-layout multiple-rows="false">
-                            <lightning-layout-item size="3">
-                              <lightning-button-icon icon-name="utility:dash" alternative-text="subtract"
-                                name="subtract" size="medium" data-index={tabIndex} onclick={increaseDecreaseButton}>
-                              </lightning-button-icon>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="6" class="slds-p-left_xx-small">
-                              <lightning-input label="" variant="label-hidden" type="number" name={tabIndex}
-                                onchange={changeIntValue} value={proL.quantity}></lightning-input>
-                            </lightning-layout-item>
-                            <lightning-layout-item size="3" class="slds-p-left_xx-small">
-                              <lightning-button-icon icon-name="utility:add" alternative-text="subtract" name="add"
-                                size="medium" onclick={increaseDecreaseButton} data-index={tabIndex}>
-                              </lightning-button-icon>
-                            </lightning-layout-item>
-                          </lightning-layout>
-                        </div>
-                      </lightning-layout-item>
-                    </lightning-layout>
+                  <div key={proL.Id} class="modal-product-row">
+                    <div class="modal-col-name">
+                      <div class="modal-product-indicator"></div>
+                      <span class="modal-product-name">{proL.Name}</span>
+                    </div>
+                    <div class="modal-col-price">
+                      <lightning-formatted-number value={proL.UnitPrice} format-style="currency"
+                        currency-code={proL.Product2.CurrencyIsoCode} currency-display-as="symbol">
+                      </lightning-formatted-number>
+                    </div>
+                    <div class="modal-col-qty">
+                      <div class="qty-stepper">
+                        <button class="qty-btn qty-btn-minus" data-index={tabIndex} name="subtract" onclick={increaseDecreaseButton}>
+                          <lightning-icon icon-name="utility:dash" size="xx-small"></lightning-icon>
+                        </button>
+                        <lightning-input label="" variant="label-hidden" type="number" name={tabIndex}
+                          onchange={changeIntValue} value={proL.quantity} class="qty-input"></lightning-input>
+                        <button class="qty-btn qty-btn-plus" data-index={tabIndex} name="add" onclick={increaseDecreaseButton}>
+                          <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </template>
               </div>
             </template>
           </div>
-          <footer class="slds-modal__footer">
-            <lightning-button type="button" label="Cancel" icon-name="utility:close" icon-position="left"
-              name="cancelButtonOnAddProductModal" onclick={closeModal} variant="Destructive" class="addSpaceInFooter">
-            </lightning-button>
+          <footer class="modal-footer-premium">
+            <button class="modal-btn modal-btn-cancel" onclick={closeModal}>
+              <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+              <span>Cancel</span>
+            </button>
             <template lwc:if={isShowProductsInAddProductModal}>
-              <lightning-button type="button" label="Add" icon-name="utility:add" icon-position="left"
-                onclick={addProductsToLeadProducts} variant="brand">
-              </lightning-button>
+              <button class="modal-btn modal-btn-primary" onclick={addProductsToLeadProducts}>
+                <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                <span>Add to Basket</span>
+              </button>
             </template>
           </footer>
         </div>
       </section>
-      <div class="slds-backdrop slds-backdrop_open"></div>
+      <div class="slds-backdrop slds-backdrop_open modal-backdrop"></div>
     </template>
     <!-- Add Product Modal End -->
     <!-- Add Discount Modal Start -->
@@ -535,11 +534,11 @@
       <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-size="12"
         padding="around-small">
         
-        <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-start slds-gutters_small">
+        <div class="payment-actions-row">
             
             <!-- Create Payment Button Components -->
             <template if:false={isOpportunityObjectType}>
-              <div class="slds-m-right_medium">
+              <div class="create-payment-wrapper">
                 <c-p-s_-enhanced-create-payment disable-button={disableButton} record-id={recordId}
                   onpaymentcreated={handlePaymentCreated} onpaymentprogress={handlePaymentProgress} hide-create-payment-button={isPaymentCreated}>
                 </c-p-s_-enhanced-create-payment>
@@ -547,7 +546,7 @@
             </template>
             
             <template if:true={isOpportunityObjectType}>
-              <div class="slds-m-right_medium">
+              <div class="create-payment-wrapper">
                 <c-dfj_-payment_-for_-opportunity is-on-product-selector='true' disable-create-payment={disableButton}
                   record-id={recordId} onpaymentcreated={handlePaymentCreated} onpaymentprogress={handlePaymentProgress} hide-create-payment-button={isPaymentCreated}>
                 </c-dfj_-payment_-for_-opportunity>
@@ -555,7 +554,7 @@
             </template>
 
             <!-- Payment Status Component -->
-            <div>
+            <div class="payment-status-wrapper">
               <c-dfj_-payment-status record-id={recordId} onpaymentcanceled={handlePaymentCanceled}
                 object-api-name={objectApiName} onpaymentfound={handlePaymentFound}
                 onpaymentmissing={handlePaymentMissing}></c-dfj_-payment-status>

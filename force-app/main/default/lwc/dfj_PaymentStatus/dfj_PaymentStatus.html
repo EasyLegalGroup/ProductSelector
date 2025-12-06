@@ -4,43 +4,43 @@
         <lightning-spinner alternative-text="Loading"></lightning-spinner>
     </template>
     
-    <div class={statusGridClass}>
-        <template if:true={showPaymentActions}>
-            <div class="cell action-cell">
-                <lightning-button-group>
-                    <lightning-button 
-                        label="Open Payment Link" 
-                        icon-name="utility:new_window"
-                        icon-position="right"
-                        onclick={handlePaymentLinkClick}
-                        disabled={isPaymentLinkDisabled}>
-                    </lightning-button>
-                    <lightning-button-menu 
-                        alternative-text="More payment actions"
-                        onselect={handleMenuSelect}
-                        variant="border-filled"
-                        disabled={isPaymentActionsDisabled}>
-                        <lightning-menu-item value="cancel" label="Cancel Payment"></lightning-menu-item>
-                        <lightning-menu-item value="bank_transfer" label="Bank Transfer"></lightning-menu-item>
-                    </lightning-button-menu>
-                </lightning-button-group>
-            </div>
-        </template>
-
-        <div class="cell status-cell">
-            <span class={statusClass}>
-                {status}
-            </span>
+    <div class="payment-status-container">
+        <!-- Left section: Button and empty row below -->
+        <div class="left-column">
+            <template if:true={showPaymentActions}>
+                <div class="action-row">
+                    <lightning-button-group>
+                        <lightning-button 
+                            label="Open Payment Link" 
+                            icon-name="utility:new_window"
+                            icon-position="right"
+                            onclick={handlePaymentLinkClick}
+                            disabled={isPaymentLinkDisabled}>
+                        </lightning-button>
+                        <lightning-button-menu 
+                            alternative-text="More payment actions"
+                            onselect={handleMenuSelect}
+                            variant="border-filled"
+                            disabled={isPaymentActionsDisabled}>
+                            <lightning-menu-item value="bank_transfer" label="Bank Transfer"></lightning-menu-item>
+                        </lightning-button-menu>
+                    </lightning-button-group>
+                </div>
+            </template>
+            <!-- Row 2 Col 1 is intentionally empty -->
         </div>
 
-        <template if:true={showSubscriptionPill}>
-            <div class="cell subscription-cell">
-                <span class="subscription-pill">Subscription included</span>
+        <!-- Center section: Status pill and refresh controls below -->
+        <div class="center-column">
+            <div class="status-row">
+                <span class={statusClass}>
+                    {status}
+                </span>
+                <template if:true={showSubscriptionPill}>
+                    <span class="subscription-pill">Subscription included</span>
+                </template>
             </div>
-        </template>
-
-        <template if:true={showRefreshControls}>
-            <div class="cell refresh-cell">
+            <template if:true={showRefreshControls}>
                 <div class="refresh-row">
                     <div class={refreshButtonClass} onclick={handleRefreshClick} title="Refresh Status">
                         <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
@@ -48,6 +48,22 @@
                     <template if:true={countdownLabel}>
                         <div class="countdown-label">{countdownLabel}</div>
                     </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Right section: Cancel Payment button aligned far right, on Row 2 -->
+        <template if:true={showCancelButton}>
+            <div class="right-column">
+                <div class="spacer-row"></div>
+                <div class="cancel-row">
+                    <lightning-button
+                        label="Cancel Payment"
+                        variant="destructive-text"
+                        icon-name="utility:close"
+                        onclick={handleDeleteButton}
+                        disabled={isCancelling}>
+                    </lightning-button>
                 </div>
             </div>
         </template>
@@ -81,30 +97,33 @@
         </template>
     </template> -->
 
-    <!-- Delete Confirmation modal -->
+    <!-- Delete Confirmation modal - Premium Design -->
     <template if:true={isdeleteConfirmationModal}>
         <div class="modal-overlay">
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-                <div class="slds-modal__container">
-                    <div class="slds-modal__content slds-p-around_small" id="modal-content-id-1">
-                        <lightning-layout multiple-rows="true">
-                            <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-size="12">
-                                <div class="slds-align_absolute-center slds-text-heading_medium slds-p-around_medium">
-                                    <p>Are you sure you want to cancel this payment?</p>
-                                </div>
-                            </lightning-layout-item>
-                            <div align="right" class="slds-p-around_medium slds-align_absolute-center">
-                                <lightning-button variant="neutral" label="No" onclick={handleCloseModal} class="slds-m-right_small" disabled={isCancelling}></lightning-button>
-                                <lightning-button variant="brand" label="Cancel Payment" onclick={handleCancelPayment} disabled={isCancelling}></lightning-button>
-                            </div>
-                            <template if:true={isCancelling}>
-                                <div class="cancel-progress">
-                                    <lightning-spinner alternative-text="Cancelling payment" size="small"></lightning-spinner>
-                                    <span class="cancel-progress__text">Cancelling payment...</span>
-                                </div>
-                            </template>
-                        </lightning-layout>
+                <div class="confirm-modal-container">
+                    <div class="confirm-modal-icon-wrapper confirm-modal-icon-danger">
+                        <lightning-icon icon-name="utility:close" size="medium"></lightning-icon>
                     </div>
+                    <h3 class="confirm-modal-title">Cancel Payment?</h3>
+                    <p class="confirm-modal-subtitle">This will cancel the current payment link. The customer will no longer be able to complete this payment.</p>
+                    <template if:true={isCancelling}>
+                        <div class="confirm-modal-spinner">
+                            <lightning-spinner alternative-text="Cancelling payment" size="small"></lightning-spinner>
+                            <span class="confirm-modal-spinner-text">Cancelling payment...</span>
+                        </div>
+                    </template>
+                    <template if:false={isCancelling}>
+                        <div class="confirm-modal-actions">
+                            <button class="modal-btn modal-btn-cancel" onclick={handleCloseModal}>
+                                <span>Keep Payment</span>
+                            </button>
+                            <button class="modal-btn modal-btn-destructive" onclick={handleCancelPayment}>
+                                <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                <span>Cancel Payment</span>
+                            </button>
+                        </div>
+                    </template>
                 </div>
             </section>
         </div>

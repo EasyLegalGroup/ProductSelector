@@ -1,8 +1,10 @@
 <template>
 
     <template if:false={hideCreatePaymentButton}>
-        <lightning-button variant="brand" icon-name="utility:billing" label="Create Payment" title="Create payment"
-            disabled={disableButton} onclick={openModel}></lightning-button>
+        <button class="create-payment-btn" disabled={disableButton} onclick={openModel}>
+            <lightning-icon icon-name="utility:moneybag" size="xx-small"></lightning-icon>
+            <span>Create Payment</span>
+        </button>
     </template>
 
     <template if:true={openConfirmationModelOnLead}>

@@ -213,6 +213,16 @@ export default class PaymentStatusLwc extends NavigationMixin(LightningElement) 
         return this.isPaymentRecordPresent && this.isPaymentPending;
     }
 
+    get showCancelButton() {
+        // Show cancel button for active, non-settled payments
+        return this.isPaymentRecordPresent && !this.isPaymentSettled && !this.isPaymentCancelled;
+    }
+
+    get isPaymentCancelled() {
+        const status = this.normalizedStatus;
+        return status.includes('cancel') || status.includes('failed') || status.includes('refund');
+    }
+
     get countdownLabel() {
         return this.showRefreshControls && this.autoRefreshCountdown > 0 ? `Auto-refresh in ${this.autoRefreshCountdown}s` : '';
     }
