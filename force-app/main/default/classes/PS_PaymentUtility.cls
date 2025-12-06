@@ -21,9 +21,14 @@ public with sharing class PS_PaymentUtility {
      * @Description  Returns whether to use test mode for Reepay API calls.
      *               Returns true for all non-production orgs (sandboxes).
      * @Return       True if test mode should be used, false for production
+     * 
+     * TEMPORARY: Disabled test mode to test with live Reepay API in sandbox.
+     *            Revert to: return !isProductionOrg();
     */
     public static Boolean shouldUseTestMode() {
-        return !isProductionOrg();
+        // TEMPORARY: Force production mode for testing - REVERT THIS!
+        return false;
+        // Original: return !isProductionOrg();
     }
 
     /**
