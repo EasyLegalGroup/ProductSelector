@@ -74,6 +74,12 @@
 | `dfj_ProductSelectorCmp` | Icon picker UI, styling, discount label | ⬜ Not Deployed |
 | `pS_EnhancedCreatePayment` | Premium modal styling | ⬜ Not Deployed |
 
+### Flows
+
+| Flow | Version | Status |
+|------|---------|--------|
+| `SF_Add_Bundle_Discounts` | v7 | ⬜ Not Deployed |
+
 ---
 
 ## Deployment Steps
@@ -147,23 +153,25 @@ sf project deploy start \
 
 ---
 
-### Step 4: Deploy LWC
+### Step 4: Deploy LWC + Flow
 **Status:** ⬜ Not Started
 
 **Components:**
 - [ ] dfj_ProductSelectorCmp
 - [ ] pS_EnhancedCreatePayment
+- [ ] SF_Add_Bundle_Discounts (Flow v7)
 
 **Command:**
 ```bash
 sf project deploy start \
   --source-dir force-app/main/default/lwc/dfj_ProductSelectorCmp \
   --source-dir force-app/main/default/lwc/pS_EnhancedCreatePayment \
-  --target-org PRODUCTION_ORG_ALIAS
+  --source-dir force-app/main/default/flows/SF_Add_Bundle_Discounts.flow-meta.xml \
+  --target-org my-prod
 ```
 
 **Notes:**
-- 
+- Flow SF_Add_Bundle_Discounts v7 retrieved from sandbox 
 
 ---
 

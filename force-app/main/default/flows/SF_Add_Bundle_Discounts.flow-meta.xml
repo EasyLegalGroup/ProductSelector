@@ -5,8 +5,8 @@
     <assignments>
         <name>Aggregate_Lead_Discounts</name>
         <label>Aggregate Lead Discounts</label>
-        <locationX>144</locationX>
-        <locationY>2246</locationY>
+        <locationX>210</locationX>
+        <locationY>2372</locationY>
         <assignmentItems>
             <assignToReference>TotalDiscount</assignToReference>
             <operator>Add</operator>
@@ -21,8 +21,8 @@
     <assignments>
         <name>Aggregate_Opportunity_Discounts</name>
         <label>Aggregate Opportunity Discounts</label>
-        <locationX>448</locationX>
-        <locationY>2246</locationY>
+        <locationX>514</locationX>
+        <locationY>2372</locationY>
         <assignmentItems>
             <assignToReference>TotalDiscount</assignToReference>
             <operator>Add</operator>
@@ -37,8 +37,8 @@
     <assignments>
         <name>Populate_Custom_Error_with_Cannot_Determine_Initial_Record</name>
         <label>Populate Custom Error with Cannot Determine Initial Record</label>
-        <locationX>576</locationX>
-        <locationY>2138</locationY>
+        <locationX>642</locationX>
+        <locationY>2264</locationY>
         <assignmentItems>
             <assignToReference>CustomError</assignToReference>
             <operator>Assign</operator>
@@ -54,7 +54,7 @@
     <assignments>
         <name>Populate_Custom_Error_with_Flow_Fault_Message</name>
         <label>Populate Custom Error with Flow Fault Message</label>
-        <locationX>314</locationX>
+        <locationX>380</locationX>
         <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>CustomError</assignToReference>
@@ -70,7 +70,7 @@
     <assignments>
         <name>Populate_Custom_Error_with_Invalid_Input_Record_ID</name>
         <label>Populate Custom Error with Invalid Input Record ID</label>
-        <locationX>1106</locationX>
+        <locationX>1172</locationX>
         <locationY>242</locationY>
         <assignmentItems>
             <assignToReference>CustomError</assignToReference>
@@ -87,7 +87,7 @@
     <assignments>
         <name>Populate_Custom_Error_with_Invalid_Market_Unit</name>
         <label>Populate Custom Error with Invalid Market Unit</label>
-        <locationX>974</locationX>
+        <locationX>1106</locationX>
         <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>CustomError</assignToReference>
@@ -104,8 +104,8 @@
     <assignments>
         <name>Populate_Custom_Error_with_No_Valid_Price_Book_Found</name>
         <label>Populate Custom Error with No Valid Price Book Found</label>
-        <locationX>798</locationX>
-        <locationY>1472</locationY>
+        <locationX>864</locationX>
+        <locationY>1598</locationY>
         <assignmentItems>
             <assignToReference>CustomError</assignToReference>
             <operator>Assign</operator>
@@ -119,10 +119,33 @@
         </connector>
     </assignments>
     <assignments>
+        <name>Populate_Danish_Pension_Values</name>
+        <label>Populate Danish Pension Values</label>
+        <locationX>50</locationX>
+        <locationY>998</locationY>
+        <assignmentItems>
+            <assignToReference>PriceBookName</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>DK Pension</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>Currency</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>DKK</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Do_We_Already_Have_a_Pricebook_ID</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>Populate_Danish_Values</name>
         <label>Populate Danish Values</label>
-        <locationX>182</locationX>
-        <locationY>890</locationY>
+        <locationX>314</locationX>
+        <locationY>998</locationY>
         <assignmentItems>
             <assignToReference>PriceBookName</assignToReference>
             <operator>Assign</operator>
@@ -144,7 +167,7 @@
     <assignments>
         <name>Populate_Irish_Values</name>
         <label>Populate Irish Values</label>
-        <locationX>710</locationX>
+        <locationX>842</locationX>
         <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>PriceBookName</assignToReference>
@@ -161,14 +184,13 @@
             </value>
         </assignmentItems>
         <connector>
-            <isGoTo>true</isGoTo>
-            <targetReference>Populate_Custom_Error_with_Invalid_Market_Unit</targetReference>
+            <targetReference>Do_We_Already_Have_a_Pricebook_ID</targetReference>
         </connector>
     </assignments>
     <assignments>
         <name>Populate_Swedish_Values</name>
         <label>Populate Swedish Values</label>
-        <locationX>446</locationX>
+        <locationX>578</locationX>
         <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>PriceBookName</assignToReference>
@@ -191,7 +213,7 @@
     <assignments>
         <name>Populate_Variables_with_Values_from_Lead</name>
         <label>Populate Variables with Values from Lead</label>
-        <locationX>50</locationX>
+        <locationX>116</locationX>
         <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>MarketUnit</assignToReference>
@@ -201,13 +223,13 @@
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>What_is_the_Lead_s_Market_Unit</targetReference>
+            <targetReference>What_is_the_Market_Unit</targetReference>
         </connector>
     </assignments>
     <assignments>
         <name>Populate_Variables_with_Values_from_Opportunity</name>
         <label>Populate Variables with Values from Opportunity</label>
-        <locationX>578</locationX>
+        <locationX>644</locationX>
         <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>MarketUnit</assignToReference>
@@ -217,7 +239,7 @@
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>What_is_the_Lead_s_Market_Unit</targetReference>
+            <targetReference>What_is_the_Market_Unit</targetReference>
         </connector>
     </assignments>
     <customProperties>
@@ -229,8 +251,8 @@
     <decisions>
         <name>Did_Add_Bundle_Discount_Subflow_Succeed</name>
         <label>Did Add Bundle Discount Subflow Succeed?</label>
-        <locationX>578</locationX>
-        <locationY>1922</locationY>
+        <locationX>644</locationX>
+        <locationY>2048</locationY>
         <defaultConnector>
             <isGoTo>true</isGoTo>
             <targetReference>Error_Screen</targetReference>
@@ -255,8 +277,8 @@
     <decisions>
         <name>Did_We_Find_an_Active_Price_Book</name>
         <label>Did We Find an Active Price Book?</label>
-        <locationX>710</locationX>
-        <locationY>1364</locationY>
+        <locationX>776</locationX>
+        <locationY>1490</locationY>
         <defaultConnector>
             <targetReference>Populate_Custom_Error_with_No_Valid_Price_Book_Found</targetReference>
         </defaultConnector>
@@ -280,8 +302,8 @@
     <decisions>
         <name>Do_We_Already_Have_a_Pricebook_ID</name>
         <label>Do We Already Have a Pricebook ID?</label>
-        <locationX>578</locationX>
-        <locationY>1148</locationY>
+        <locationX>644</locationX>
+        <locationY>1274</locationY>
         <defaultConnector>
             <targetReference>Get_Price_Book</targetReference>
         </defaultConnector>
@@ -303,9 +325,34 @@
         </rules>
     </decisions>
     <decisions>
-        <name>What_is_the_Lead_s_Market_Unit</name>
-        <label>What is the Lead&apos;s Market Unit?</label>
-        <locationX>578</locationX>
+        <name>Is_it_a_DK_Pension_User</name>
+        <label>Is it a DK Pension User?</label>
+        <locationX>182</locationX>
+        <locationY>890</locationY>
+        <defaultConnector>
+            <targetReference>Populate_Danish_Values</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>User_is_DK_Pension</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$User.CompanyName</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Pension</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Populate_Danish_Pension_Values</targetReference>
+            </connector>
+            <label>User is DK Pension</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>What_is_the_Market_Unit</name>
+        <label>What is the Market Unit?</label>
+        <locationX>644</locationX>
         <locationY>782</locationY>
         <defaultConnector>
             <targetReference>Populate_Custom_Error_with_Invalid_Market_Unit</targetReference>
@@ -329,7 +376,7 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Populate_Danish_Values</targetReference>
+                <targetReference>Is_it_a_DK_Pension_User</targetReference>
             </connector>
             <label>Danish Market Unit</label>
         </rules>
@@ -374,8 +421,8 @@
     <decisions>
         <name>Which_Discount_Are_We_Aggregating</name>
         <label>Which Discount Are We Aggregating?</label>
-        <locationX>316</locationX>
-        <locationY>2030</locationY>
+        <locationX>382</locationX>
+        <locationY>2156</locationY>
         <defaultConnector>
             <targetReference>Populate_Custom_Error_with_Cannot_Determine_Initial_Record</targetReference>
         </defaultConnector>
@@ -414,7 +461,7 @@
     <decisions>
         <name>Which_Record_Did_We_Get</name>
         <label>Which Record Did We Get?</label>
-        <locationX>578</locationX>
+        <locationX>644</locationX>
         <locationY>134</locationY>
         <defaultConnector>
             <targetReference>Populate_Custom_Error_with_Invalid_Input_Record_ID</targetReference>
@@ -475,8 +522,8 @@
     <loops>
         <name>Loop_LeadProductCollection</name>
         <label>Loop LeadProductCollection</label>
-        <locationX>56</locationX>
-        <locationY>2138</locationY>
+        <locationX>122</locationX>
+        <locationY>2264</locationY>
         <collectionReference>LeadProductCollection</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -489,8 +536,8 @@
     <loops>
         <name>Loop_OppProductCollection</name>
         <label>Loop OppProductCollection</label>
-        <locationX>360</locationX>
-        <locationY>2138</locationY>
+        <locationX>426</locationX>
+        <locationY>2264</locationY>
         <collectionReference>OpportunityProductCollection</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -522,7 +569,7 @@
     <recordLookups>
         <name>Get_Lead</name>
         <label>Get Lead</label>
-        <locationX>50</locationX>
+        <locationX>116</locationX>
         <locationY>242</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -546,7 +593,7 @@
     <recordLookups>
         <name>Get_Opportunity</name>
         <label>Get Opportunity</label>
-        <locationX>578</locationX>
+        <locationX>644</locationX>
         <locationY>242</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -571,8 +618,8 @@
     <recordLookups>
         <name>Get_Price_Book</name>
         <label>Get Price Book</label>
-        <locationX>710</locationX>
-        <locationY>1256</locationY>
+        <locationX>776</locationX>
+        <locationY>1382</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Did_We_Find_an_Active_Price_Book</targetReference>
@@ -606,7 +653,7 @@
     <screens>
         <name>Error_Screen</name>
         <label>Error Screen</label>
-        <locationX>314</locationX>
+        <locationX>380</locationX>
         <locationY>458</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
@@ -630,8 +677,8 @@
     <screens>
         <name>Screen_2_Display_Results</name>
         <label>Screen 2 - Display Results</label>
-        <locationX>316</locationX>
-        <locationY>2522</locationY>
+        <locationX>382</locationX>
+        <locationY>2648</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
@@ -843,7 +890,7 @@
         <showHeader>false</showHeader>
     </screens>
     <start>
-        <locationX>452</locationX>
+        <locationX>518</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Which_Record_Did_We_Get</targetReference>
@@ -853,8 +900,8 @@
     <subflows>
         <name>AL_Add_Bundle_Discounts</name>
         <label>AL - Add Bundle Discounts</label>
-        <locationX>578</locationX>
-        <locationY>1814</locationY>
+        <locationX>644</locationX>
+        <locationY>1940</locationY>
         <connector>
             <targetReference>Did_Add_Bundle_Discount_Subflow_Succeed</targetReference>
         </connector>
