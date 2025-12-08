@@ -372,7 +372,7 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .header-icon {
-  --slds-c-icon-color-foreground-default: #6366f1;
+  --slds-c-icon-color-foreground-default: #3b82f6;
   opacity: 0.8;
 }
 
@@ -425,7 +425,7 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .product-row:hover {
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, rgba(99, 102, 241, 0.08) 50%, rgba(99, 102, 241, 0.04) 100%);
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.04) 0%, rgba(59, 130, 246, 0.08) 50%, rgba(59, 130, 246, 0.04) 100%);
 }
 
 .product-row td {
@@ -448,7 +448,7 @@ lightning-layout-item[padding="around-small"] {
 .product-indicator {
   width: 3px;
   height: 20px;
-  background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
   border-radius: 3px;
   flex-shrink: 0;
 }
@@ -466,12 +466,12 @@ lightning-layout-item[padding="around-small"] {
   justify-content: center;
   min-width: 1.75rem;
   height: 1.75rem;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   color: white;
   font-weight: 700;
   font-size: 0.75rem;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 /* Price Values */
@@ -556,7 +556,7 @@ lightning-layout-item[padding="around-small"] {
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
@@ -586,12 +586,12 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .summary-row:hover {
-  background: rgba(99, 102, 241, 0.03);
+  background: rgba(59, 130, 246, 0.03);
 }
 
 .summary-row-primary {
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.06) 0%, transparent 100%);
-  border-left: 3px solid #6366f1;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.06) 0%, transparent 100%);
+  border-left: 3px solid #3b82f6;
 }
 
 .summary-label {
@@ -608,7 +608,7 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .summary-icon {
-  --slds-c-icon-color-foreground-default: #6366f1;
+  --slds-c-icon-color-foreground-default: #3b82f6;
 }
 
 .summary-value {
@@ -690,8 +690,8 @@ lightning-layout-item[padding="around-small"] {
    ============================================ */
 
 .modal-container-premium {
-  width: 100%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 900px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -702,7 +702,7 @@ lightning-layout-item[padding="around-small"] {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
@@ -815,7 +815,7 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .modal-product-row:hover {
-  background: rgba(99, 102, 241, 0.04);
+  background: rgba(59, 130, 246, 0.04);
 }
 
 .modal-col-name {
@@ -827,7 +827,7 @@ lightning-layout-item[padding="around-small"] {
 .modal-product-indicator {
   width: 3px;
   height: 18px;
-  background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -932,15 +932,15 @@ lightning-layout-item[padding="around-small"] {
 }
 
 .modal-btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
   --slds-c-icon-color-foreground-default: white;
 }
 
 .modal-btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
 }
 
 .modal-backdrop {
@@ -967,6 +967,54 @@ lightning-layout-item[padding="around-small"] {
   border-color: #cbd5e1 !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Discount Button Wrapper */
+.discount-button-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.discount-button-wrapper .fixed-button {
+  font-size: 0.8125rem;
+  padding: 0 0.75rem;
+}
+
+/* Active Discount Label - Shown under button when discount is applied */
+.discount-active-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-radius: 4px;
+  border: 1px solid #10b981;
+  animation: discountPulse 2s ease-in-out infinite;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.discount-label-icon {
+  --slds-c-icon-color-foreground-default: #059669;
+}
+
+.discount-label-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #059669;
+  letter-spacing: -0.01em;
+}
+
+@keyframes discountPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(16, 185, 129, 0.3);
+  }
 }
 
 .spark-button {
@@ -1048,6 +1096,95 @@ lightning-layout-item[padding="around-small"] {
 }
 
 /* ============================================
+   PRICEBOOK ICON PICKER STYLES
+   ============================================ */
+
+.pricebook-icon-picker {
+  padding: 1rem 0;
+}
+
+.pricebook-picker-subtitle {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.pricebook-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pricebook-selection-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pricebook-selection-card:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+  border-color: #3b82f6;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2),
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.pricebook-selection-card:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.15);
+}
+
+.pricebook-card-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 10px;
+  margin-right: 1rem;
+  padding: 10px;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.pricebook-card-icon lightning-icon {
+  --slds-c-icon-color-foreground-default: white;
+}
+
+.pricebook-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pricebook-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.pricebook-card-arrow {
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+  opacity: 0.4;
+  transition: all 0.25s ease;
+}
+
+.pricebook-selection-card:hover .pricebook-card-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+  --slds-c-icon-color-foreground-default: #3b82f6;
+}
+
+/* ============================================
    PRICEBOOK SWITCHER STYLES
    ============================================ */
 
@@ -1081,13 +1218,13 @@ lightning-layout-item[padding="around-small"] {
 
 /* Larger Modal Body */
 .modal-body-large {
-  max-height: 500px;
+  max-height: 600px;
 }
 
-/* Modal container sizing */
+/* Modal container sizing - Enlarged for better product visibility */
 .modal-container-premium {
-  width: 100%;
-  max-width: 700px;
+  width: 95%;
+  max-width: 900px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);

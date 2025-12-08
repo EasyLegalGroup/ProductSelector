@@ -240,10 +240,22 @@ public without sharing class DFJProductController_Class {
                 }
                 priceBookIdVSPricebookEntries.get(pbe.PriceBook2.Id).add(pbe);
             }
+            
+            // Build map of Internal_Identifier__c to Icon from Price_Book__mdt
+            Map<String, String> identifierToIcon = new Map<String, String>();
+            for (Price_Book__mdt pbConfig : [SELECT Internal_Identifier__c, Icon__c FROM Price_Book__mdt]) {
+                String icon = String.isNotBlank(pbConfig.Icon__c) ? pbConfig.Icon__c : 'standard:price_books';
+                identifierToIcon.put(pbConfig.Internal_Identifier__c, icon);
+            }
+            
             for (Pricebook2 pb : listOfPricebooks){
                 productDataWithPriceBook productInstance = new productDataWithPriceBook();
                 productInstance.pb2 = pb;
                 productInstance.pbeList = priceBookIdVSPricebookEntries.get(pb.Id);
+                // Set icon from CMDT, default to standard:price_books if not found
+                productInstance.icon = identifierToIcon.containsKey(pb.Internal_Identifier__c) 
+                    ? identifierToIcon.get(pb.Internal_Identifier__c) 
+                    : 'standard:price_books';
                 productDataWithPriceBooksList.add(productInstance);
             }
             List<sObject> childProducts = new List<sObject>();
@@ -305,5 +317,6 @@ public without sharing class DFJProductController_Class {
     public class productDataWithPriceBook{
         @AuraEnabled public Pricebook2 pb2;
         @AuraEnabled public List<PricebookEntry> pbeList;
+        @AuraEnabled public String icon;
     }
 }

@@ -47,6 +47,7 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     @track permissionError = null; // Track permission errors
     isPaymentCreated = false;
     priceBookOptionsForCombobox = [];
+    priceBookIconOptions = []; // Icon picker options with icon, label, value
     selectedPriceBookIdUsingCombobox;
     @track fieldApiMap = {
         Lead : {'Id':'Id','Discount':'Discount__c','UnitPrice':'Item_Price__c','Parent':'Lead__c','Name':'Name','Pricebook_Id__c':'Pricebook_Id__c','isSubscription':'Is_subscription__c','PlanHandle':'Plan_handle__c','CurrencyIsoCode':'CurrencyIsoCode','PriceBookEntry':'PricebookEntry_Id__c','ProductId':'Product_Id__c','ProductName':'Product_Name__c', 'Quantity':'Quantity__c','PartnerProvisionValue':'Partner_Provision_Value__c','PartnerSalesValue':'Partner_Sales_Value__c','ProvisionBase':'Provision_Base__c'},
@@ -65,6 +66,26 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         return this.priceBookOptionsForCombobox.length === 1 ||
             Array.isArray(this.productLineItems) && this.productLineItems.length >= 1;
     }
+
+    // Show icon picker when: more than 1 pricebook available and no pricebook selected yet
+    get showPricebookIconPicker() {
+        return Array.isArray(this.priceBookIconOptions) && 
+               this.priceBookIconOptions.length > 1 && 
+               !this.selectedPriceBookIdUsingCombobox &&
+               !(Array.isArray(this.productLineItems) && this.productLineItems.length >= 1);
+    }
+
+    get hasActiveDiscount() {
+        return this.fixedDiscountAmount && this.fixedDiscountAmount > 0;
+    }
+
+    get discountLabelText() {
+        if (this.hasActiveDiscount) {
+            return `${this.isoCode || ''} ${this.fixedDiscountAmount}`;
+        }
+        return '';
+    }
+
     get flowInputVariables() {
          return [ {
             name: "recordId",
@@ -206,6 +227,10 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         return this.isPaymentCreated || this.isPaymentInProgress;
     }
 
+    get isClearAllDisabled(){
+        return !this.isProductAvailable || this.isPaymentCreated || this.isPaymentInProgress;
+    }
+
 //change kajal 
 
     handleMessage(message) {
@@ -232,6 +257,30 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         this.fullProductData.forEach(ele => {
             if (this.selectedPriceBookIdUsingCombobox === ele.pb2?.Id) {
                 this.currentProductList = ele.pbeList;
+                // Update isoCode from the pricebook's currency
+                if (ele.pbeList && ele.pbeList.length > 0 && ele.pbeList[0].Pricebook2) {
+                    this.isoCode = ele.pbeList[0].Pricebook2.CurrencyIsoCode;
+                }
+            }
+        });
+    }
+
+    // Handler for pricebook icon card selection
+    handlePricebookCardSelect(event) {
+        const selectedId = event.currentTarget.dataset.id;
+        this.selectedPriceBookIdUsingCombobox = selectedId;
+        
+        // Find and set the pricebook name and products
+        const selectedOption = this.priceBookIconOptions.find(opt => opt.value === selectedId);
+        this.selectedPriceBookName = selectedOption ? selectedOption.label : '';
+        
+        this.fullProductData.forEach(ele => {
+            if (selectedId === ele.pb2?.Id) {
+                this.currentProductList = ele.pbeList;
+                // Update isoCode from the pricebook's currency
+                if (ele.pbeList && ele.pbeList.length > 0 && ele.pbeList[0].Pricebook2) {
+                    this.isoCode = ele.pbeList[0].Pricebook2.CurrencyIsoCode;
+                }
             }
         });
     }
@@ -297,6 +346,12 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                         this.isShowOrderTotal = true;
                         priceBookId = result.childProductData[0].Pricebook_Id__c;
                         this.selectedPriceBookIdUsingCombobox = priceBookId;
+                        
+                        // Update isoCode from existing products' currency
+                        if (result.childProductData[0].CurrencyIsoCode) {
+                            this.isoCode = result.childProductData[0].CurrencyIsoCode;
+                        }
+                        
                         let fullProductData = this.fullProductData;
                         this.currentProductList = [];
                         fullProductData.forEach(ele => {
@@ -333,11 +388,25 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
         this.priceBookOptionsForCombobox = this.priceBooks.map(ele => {
             return {label: ele.Name, value: ele.Id}
         });
+        
+        // Build icon options from fullProductData which includes icon from CMDT
+        this.priceBookIconOptions = this.fullProductData.map(ele => {
+            return {
+                label: ele.pb2.Name,
+                value: ele.pb2.Id,
+                icon: ele.icon || 'standard:price_books'
+            };
+        });
+        
         if (this.priceBookOptionsForCombobox.length === 1) {
             this.selectedPriceBookIdUsingCombobox = this.priceBookOptionsForCombobox[0].value;
             if (Array.isArray(this.fullProductData) && this.fullProductData.length > 0) {
                 this.selectedPriceBookName = this.fullProductData[0].pb2.Name;
                 this.currentProductList = this.fullProductData[0].pbeList;
+                // Update isoCode from the pricebook's currency
+                if (this.currentProductList && this.currentProductList.length > 0 && this.currentProductList[0].Pricebook2) {
+                    this.isoCode = this.currentProductList[0].Pricebook2.CurrencyIsoCode;
+                }
             }
         }
     }
@@ -477,6 +546,8 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                         productInstance.Partner_Sales_Value__c = ele.Partner_sales_value__c;
                         productInstance.Provision_Base__c = ele.Provision_base__c;
                         productInstance.CurrencyIsoCode = ele.Pricebook2.CurrencyIsoCode;
+                        // Update global isoCode to match the pricebook currency
+                        this.isoCode = ele.Pricebook2.CurrencyIsoCode;
                         productInstance.Plan_handle__c = ele.Product2.Plan__c;
                         productInstance.Is_subscription__c = ele.Product2.Is_subscription__c;
                         finalProductsList.push(productInstance);
@@ -521,6 +592,8 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                             productInstance.Partner_Sales_Value__c = ele.Pricebook2.partner_sales_value__c;
                             productInstance.Provision_Base__c = ele.Pricebook2.Provision_base__c;
                             productInstance.CurrencyIsoCode = ele.Pricebook2.CurrencyIsoCode;
+                            // Update global isoCode to match the pricebook currency
+                            this.isoCode = ele.Pricebook2.CurrencyIsoCode;
                             productInstance.Plan_handle__c = ele.Product2.Plan__c;
                             productInstance.Is_subscription__c = ele.Product2.Is_subscription__c;
                             finalProductsList.push(productInstance);
@@ -652,8 +725,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
 
         try {
             let productsList = this.currentProductList;
-            let tabIndex = event.target.dataset.index;
-            let buttonName = event.target.name;
+            // Use currentTarget to get the button element, not the clicked child (icon)
+            let tabIndex = event.currentTarget.dataset.index;
+            let buttonName = event.currentTarget.name;
 
             if (productsList[tabIndex].quantity < 0) {
                 productsList[tabIndex].quantity = 0;
@@ -792,6 +866,10 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     handleDiscountInputKeydown(event) {
         if (event.keyCode === 13) { // Enter key
             this.saveDiscount();
+        } else if (event.keyCode === 27) { // ESC key
+            this.isDiscountInputVisible = false;
+            // Reset to original value
+            this.discountAmount = this.fixedDiscountAmount;
         }
     }
 

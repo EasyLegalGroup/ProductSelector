@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Icon__c</fullName>
+    <defaultValue>&quot;standard:price_books&quot;</defaultValue>
+    <description>The SLDS icon name to display for this pricebook in the icon picker UI. Format: category:iconName (e.g., standard:price_books, custom:custom1)</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Enter an SLDS icon name like &quot;standard:price_books&quot; or &quot;custom:custom1&quot;</inlineHelpText>
+    <label>Icon</label>
+    <length>100</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

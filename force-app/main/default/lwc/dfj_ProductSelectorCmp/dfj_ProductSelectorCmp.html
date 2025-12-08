@@ -49,7 +49,7 @@
               </th>
               <th class="col-action">
                 <div class="header-content header-right">
-                  <button class="empty-basket-btn" onclick={deleteRecord} disabled={isActionButtonsDisabled} title="Empty Basket">
+                  <button class="empty-basket-btn" onclick={deleteRecord} disabled={isClearAllDisabled} title="Empty Basket">
                     <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
                     <span class="empty-basket-text">Clear All</span>
                   </button>
@@ -146,8 +146,17 @@
           <template if:true={isAddDiscount}>
             <template if:false={isDiscountInputVisible}>
                 <template if:false={showDiscountSuccess}>
-                    <lightning-button class={discountButtonClass} variant="Neutral"
-                    label="+ Discount" icon-position="Center" onclick={handleAddDicountModal} disabled={isActionButtonsDisabled}></lightning-button>
+                    <div class="discount-button-wrapper">
+                        <button class="slds-m-right_medium fixed-button gray-button" onclick={handleAddDicountModal} disabled={isActionButtonsDisabled}>
+                            <span>+ Discount</span>
+                        </button>
+                        <template if:true={hasActiveDiscount}>
+                            <div class="discount-active-label">
+                                <lightning-icon icon-name="utility:check" size="xx-small" class="discount-label-icon"></lightning-icon>
+                                <span class="discount-label-text">{discountLabelText}</span>
+                            </div>
+                        </template>
+                    </div>
                 </template>
                 <template if:true={showDiscountSuccess}>
                      <div class="slds-m-right_medium fixed-button success-indicator slds-align_absolute-center">
@@ -167,16 +176,9 @@
           </template>
 
           <template if:false={isAddDiscount}>
-            <!-- same implemented below -->
-            <!-- <lightning-button class="slds-m-right_medium fixed-button gray-button" type="button" variant="Neutral"
-              label="Add Discount" icon-name="utility:magicwand" icon-position="Center" disabled>
-            </lightning-button> -->
-
-
-            <lightning-button class="slds-m-right_medium fixed-button gray-button" variant="Neutral"
-              label="+ Discount" icon-position="Center" disabled></lightning-button>
-
-
+            <button class="slds-m-right_medium fixed-button gray-button" disabled>
+                <span>+ Discount</span>
+            </button>
           </template>
 
 
@@ -267,7 +269,7 @@
             <div class="discounts-section">
               <div class="summary-row summary-row-discount">
                 <div class="summary-label summary-label-indent">
-                  <lightning-icon icon-name="utility:discount" size="xx-small" class="discount-icon"></lightning-icon>
+                  <lightning-icon icon-name="utility:bundle_config" size="xx-small" class="discount-icon"></lightning-icon>
                   <span>Product Discounts</span>
                 </div>
                 <div class="summary-value discount-value">
@@ -396,21 +398,44 @@
             </button>
           </header>
           <div class="modal-body-premium modal-body-large" id="modal-content-id-3">
-            <template lwc:if={selectedPriceBookName}>
+            <!-- Pricebook Icon Picker - shows when 2+ pricebooks and none selected -->
+            <template lwc:if={showPricebookIconPicker}>
+              <div class="pricebook-icon-picker">
+                <p class="pricebook-picker-subtitle">Select a price book to view products</p>
+                <div class="pricebook-cards-grid">
+                  <template for:each={priceBookIconOptions} for:item="option">
+                    <div key={option.value} class="pricebook-selection-card" 
+                         data-id={option.value} 
+                         onclick={handlePricebookCardSelect}>
+                      <div class="pricebook-card-icon">
+                        <lightning-icon icon-name={option.icon} size="large"></lightning-icon>
+                      </div>
+                      <div class="pricebook-card-content">
+                        <h3 class="pricebook-card-title">{option.label}</h3>
+                      </div>
+                      <div class="pricebook-card-arrow">
+                        <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <!-- Selected pricebook with switcher dropdown -->
+            <template lwc:elseif={selectedPriceBookName}>
               <div class="pricebook-switcher">
                 <div class="pricebook-current">
                   <lightning-icon icon-name="utility:check" size="xx-small" class="pricebook-check-icon"></lightning-icon>
                   <span class="pricebook-name">{selectedPriceBookName}</span>
                 </div>
-                <template lwc:if={isShowComboboxToSelectPricebook}>
-                  <lightning-combobox variant="label-hidden" value={selectedPriceBookIdUsingCombobox}
-                    disabled={isPricebookSelectionDisabled} placeholder="Switch Price Book"
-                    options={priceBookOptionsForCombobox} onchange={handleSelectionOfPricebook}
-                    class="pricebook-dropdown">
-                  </lightning-combobox>
-                </template>
+                <lightning-combobox variant="label-hidden" value={selectedPriceBookIdUsingCombobox}
+                  disabled={isPricebookSelectionDisabled} placeholder="Switch Price Book"
+                  options={priceBookOptionsForCombobox} onchange={handleSelectionOfPricebook}
+                  class="pricebook-dropdown">
+                </lightning-combobox>
               </div>
             </template>
+            <!-- Fallback combobox for single pricebook (auto-selected) -->
             <template lwc:elseif={isShowComboboxToSelectPricebook}>
               <div class="pricebook-selector">
                 <lightning-combobox label="Select Price Book" value={selectedPriceBookIdUsingCombobox}

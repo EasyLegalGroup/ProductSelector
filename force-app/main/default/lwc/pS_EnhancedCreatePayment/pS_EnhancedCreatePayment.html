@@ -1,7 +1,7 @@
 <template>
 
     <template if:false={hideCreatePaymentButton}>
-        <button class="create-payment-btn" disabled={disableButton} onclick={openModel}>
+        <button class="create-payment-btn" disabled={disableButton} onclick={openModel} data-action="createPayment">
             <lightning-icon icon-name="utility:moneybag" size="xx-small"></lightning-icon>
             <span>Create Payment</span>
         </button>
@@ -9,67 +9,55 @@
 
     <template if:true={openConfirmationModelOnLead}>
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
-            <div class="slds-modal__container">
-                <div class="slds-m-around_medium">
-                    <template if:true={isLoadedSpinner} class="slds-is-relative">
-                        <lightning-spinner alternative-text="Loading..." variant="brand">
-                        </lightning-spinner>
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium premium-modal">
+            <div class="slds-modal__container modal-container-premium">
+                <header class="modal-header-premium">
+                    <div class="modal-header-content">
+                        <div class="modal-header-icon">
+                            <lightning-icon icon-name="utility:moneybag" size="small"></lightning-icon>
+                        </div>
+                        <h2 class="modal-title">Confirm Order</h2>
+                    </div>
+                    <button class="modal-close-btn" onclick={closeModal} title="Close">
+                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                    </button>
+                </header>
+                <div class="modal-body-premium" id="modal-content-id-1">
+                    <template if:true={isLoadedSpinner}>
+                        <div class="spinner-container">
+                            <lightning-spinner alternative-text="Loading..." variant="brand">
+                            </lightning-spinner>
+                        </div>
                     </template>
-
-                </div>
-                <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="close"
-                    variant="bare-inverse" class="slds-modal__close"></lightning-button-icon>
-
-                <!-- Modal/Popup Box LWC body starts here -->
-
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <fieldset class="slds-box">
-                        <legend class="slds-text-heading_medium slds-text-align_center"><strong>CONFIRM ORDER</strong>
-                        </legend>
-                        <div class=" slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-vertical_none">
-                            <div
-                                class="slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-horizontal_none">
-
-
-
-                                <div class="slds-text-heading_small slds-text-align_left">
-                                    <p><b>Name:</b> {leadAddressInfo.Name}</p>
+                    <div class="order-section">
+                        <div class="customer-info-section">
+                            <h3 class="section-title">Customer Information</h3>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">Name:</span>
+                                    <span class="info-value">{leadAddressInfo.Name}</span>
                                 </div>
-
-                                &nbsp;&nbsp;
-
-                                <div class="slds-text-heading_small  slds-text-align_left">
-                                    <p><b>Email:</b> {leadAddressInfo.Email}</p>
+                                <div class="info-row">
+                                    <span class="info-label">Email:</span>
+                                    <span class="info-value">{leadAddressInfo.Email}</span>
                                 </div>
-
-                                &nbsp;&nbsp;
-
-                                <div class="slds-text-heading_small  slds-text-align_left">
-                                    <p><b>Phone:</b> {leadAddressInfo.Phone_Formatted__c}</p>
+                                <div class="info-row">
+                                    <span class="info-label">Phone:</span>
+                                    <span class="info-value">{leadAddressInfo.Phone_Formatted__c}</span>
                                 </div>
-
-                                &nbsp;&nbsp;
-
-                                <div class="slds-text-heading_small  slds-text-align_left">
-                                    <p><b>Address:</b> {leadAddressInfo.Street}</p></b>
+                                <div class="info-row">
+                                    <span class="info-label">Address:</span>
+                                    <span class="info-value">{leadAddressInfo.Street}</span>
                                 </div>
-
-                                &nbsp;&nbsp;
-
-                                <div class="slds-text-heading_small  slds-text-align_left">
-                                    <p><b>Postal Code / City:</b> {leadAddressInfo.PostalCode} {leadAddressInfo.City}
-                                    </p>
+                                <div class="info-row">
+                                    <span class="info-label">Postal Code / City:</span>
+                                    <span class="info-value">{leadAddressInfo.PostalCode} {leadAddressInfo.City}</span>
                                 </div>
+                            </div>
+                        </div>
 
-                                &nbsp;&nbsp;
-
-                                <div>
-                                    <p> </p>
-                                </div>
-                                <div class="slds-text-heading_medium slds-text-align_left">
-                                    <b>Order Information</b>
-                                </div>&nbsp;&nbsp;
+                        <div class="order-info-section">
+                            <h3 class="section-title">Order Information</h3>
 
                                 <table class="slds-table slds-table_cell-buffer slds-table_bordered anotherhover "
                                     style="table-layout: fixed;">
@@ -154,89 +142,55 @@
                                     </tbody>
 
                                 </table>
-                                &nbsp;&nbsp;
 
-                                <lightning-layout multiple-rows="true">
-
-
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
-                                        <div class="slds-float_left" title="Fixed Discount"><b>Sub Total</b></div>
-                                    </lightning-layout-item>
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
+                            <div class="order-totals">
+                                <div class="total-row">
+                                    <span class="total-label">Sub Total</span>
+                                    <span class="total-value">
                                         <lightning-formatted-number value={orderSubtotal} format-style="currency"
                                             currency-code={isoCode}
                                             currency-display-as="symbol"></lightning-formatted-number>
-                                    </lightning-layout-item>
-                                    <lightning-layout-item size="12" large-device-size="6" medium-device-size="6"
-                                        small-device-size="12"></lightning-layout-item>
-
-                                </lightning-layout> &nbsp;&nbsp;
-
-                                <lightning-layout multiple-rows="true">
-
-
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
-                                        <div class="slds-float_left" title="Fixed Discount"><b>Fixed Discount</b></div>
-                                    </lightning-layout-item>
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
+                                    </span>
+                                </div>
+                                <div class="total-row">
+                                    <span class="total-label">Fixed Discount</span>
+                                    <span class="total-value discount-value">
                                         <lightning-formatted-number value={leadAddressInfo.Fixed_discount_Type__c}
                                             format-style="currency" currency-code={isoCode}
                                             currency-display-as="symbol"></lightning-formatted-number>
-                                    </lightning-layout-item>
-                                    <lightning-layout-item size="12" large-device-size="6" medium-device-size="6"
-                                        small-device-size="12"></lightning-layout-item>
-
-                                </lightning-layout> &nbsp;&nbsp;
-
-
-                                <lightning-layout multiple-rows="true">
-
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
-                                        <div class="slds-float_left" title="Order Total"><b>Order Total</b></div>
-                                    </lightning-layout-item>
-                                    <lightning-layout-item size="12" large-device-size="2" medium-device-size="2"
-                                        small-device-size="12">
-                                        <u><lightning-formatted-number value={orderTotal} format-style="currency"
-                                                currency-code={isoCode}
-                                                currency-display-as="symbol"></lightning-formatted-number></u>
-                                    </lightning-layout-item>
-
-                                </lightning-layout> &nbsp;&nbsp;
-
-
-                                <lightning-layout multiple-rows="true">
-
-                                    <lightning-layout-item size="12" large-device-size="12" medium-device-size="12"
-                                        small-device-size="12">
-                                        <div class="slds-float_left"><b>{subscriptionIncluded}</b></div>
-                                    </lightning-layout-item>
-
-                                </lightning-layout>
-
-
-
+                                    </span>
+                                </div>
+                                <div class="total-row total-final">
+                                    <span class="total-label">Order Total</span>
+                                    <span class="total-value">
+                                        <lightning-formatted-number value={orderTotal} format-style="currency"
+                                            currency-code={isoCode}
+                                            currency-display-as="symbol"></lightning-formatted-number>
+                                    </span>
+                                </div>
+                                <template if:true={subscriptionIncluded}>
+                                    <div class="subscription-notice">
+                                        <span class="subscription-text">{subscriptionIncluded}</span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </div>
 
-
-                <!-- Modal/Popup Box LWC footer starts here -->
-                <footer class="slds-modal__footer">
-                    <lightning-button variant="brand" onclick={handlePaymentRecordCreation} label="Confirm"
-                        name="Confirm" title="Proceed with Payment">Confirm</lightning-button>
-                    <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={closeModal}
-                        style="padding-left: 6px;"></lightning-button>
-
+                <footer class="modal-footer-premium">
+                    <button class="modal-btn modal-btn-cancel" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                        <span>Cancel</span>
+                    </button>
+                    <button class="modal-btn modal-btn-primary" onclick={handlePaymentRecordCreation}>
+                        <lightning-icon icon-name="utility:check" size="xx-small"></lightning-icon>
+                        <span>Confirm Payment</span>
+                    </button>
                 </footer>
             </div>
         </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
+        <div class="slds-backdrop slds-backdrop_open modal-backdrop"></div>
     </template>
 
 
@@ -286,9 +240,11 @@
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
                 <div class="slds-m-around_medium">
-                    <template if:true={isLoadedSpinner} class="slds-is-relative">
-                        <lightning-spinner alternative-text="Loading..." variant="brand">
-                        </lightning-spinner>
+                    <template if:true={isLoadedSpinner}>
+                        <div class="slds-is-relative">
+                            <lightning-spinner alternative-text="Loading..." variant="brand">
+                            </lightning-spinner>
+                        </div>
                     </template>
 
                 </div>

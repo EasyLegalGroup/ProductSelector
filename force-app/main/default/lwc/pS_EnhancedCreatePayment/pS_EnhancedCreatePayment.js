@@ -61,10 +61,12 @@ export default class PS_EnhancedCreatePayment extends LightningElement {
    
     openModel(event){
         try {
-        let buttonLabal = event.target.label ;
+        // Use currentTarget to get the button element, not the clicked child (icon/span)
+        // Check for data-action attribute since we're using a native button, not lightning-button
+        let buttonAction = event.currentTarget.dataset.action;
         //Changes DIN-385 Start
         // TODO : Address not updating if lead address is already there but wants to update address
-        if(buttonLabal == 'Create Payment'){ 
+        if(buttonAction === 'createPayment'){ 
             if(this.objectApiName == 'Order'){
                 this.openConfirmationModelOnOrder = true;
                 this.modelContent = 'Click ok to create the payment and invoice record.';

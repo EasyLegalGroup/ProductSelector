@@ -36,3 +36,237 @@
     transform: none;
     box-shadow: none;
 }
+
+/* ============================================
+   PREMIUM MODAL STYLES
+   ============================================ */
+
+.premium-modal {
+    z-index: 9001;
+}
+
+.modal-container-premium {
+    width: 100%;
+    max-width: 700px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header-premium {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.modal-header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    --slds-c-icon-color-foreground-default: white;
+}
+
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.modal-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    --slds-c-icon-color-foreground-default: white;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.modal-body-premium {
+    padding: 1.25rem;
+    background: #fafbfc;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Customer Info Section */
+.order-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.customer-info-section,
+.order-info-section {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e2e8f0;
+}
+
+.section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #10b981;
+    display: inline-block;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-row {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #475569;
+    min-width: 120px;
+}
+
+.info-value {
+    color: #1e293b;
+}
+
+/* Order Totals Section */
+.order-totals {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+}
+
+.total-label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.total-value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.discount-value {
+    color: #ef4444;
+}
+
+.total-final {
+    border-top: 2px solid #10b981;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+}
+
+.total-final .total-label,
+.total-final .total-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.subscription-notice {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-radius: 6px;
+    border: 1px solid #10b981;
+}
+
+.subscription-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+/* Spinner Container */
+.spinner-container {
+    position: relative;
+    min-height: 100px;
+}
+
+/* Modal Footer */
+.modal-footer-premium {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+}
+
+.modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+}
+
+.modal-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+    --slds-c-icon-color-foreground-default: #64748b;
+}
+
+.modal-btn-cancel:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    --slds-c-icon-color-foreground-default: white;
+}
+
+.modal-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+}
+
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+}
