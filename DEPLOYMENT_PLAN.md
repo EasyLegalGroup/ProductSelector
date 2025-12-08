@@ -65,7 +65,14 @@
 
 | Class | Changes | Status |
 |-------|---------|--------|
-| `DFJProductController_Class.cls` | Added icon to wrapper, queries CMDT | ⬜ Not Deployed |
+| `DFJProductController_Class.cls` | NEW - Added icon to wrapper, queries CMDT | ⬜ Not Deployed |
+| `DFJProductService_Class.cls` | NEW - Product selector service layer | ⬜ Not Deployed |
+| `DFJ_PaymentController.cls` | NEW - Payment controller | ⬜ Not Deployed |
+| `PS_PaymentController.cls` | MODIFIED - Payment controller updates | ⬜ Not Deployed |
+| `PS_PaymentService.cls` | MODIFIED - Payment service updates | ⬜ Not Deployed |
+| `PS_PaymentUtility.cls` | MODIFIED - Payment utility updates | ⬜ Not Deployed |
+| `PS_PaymentController_Test.cls` | MODIFIED - Test class updates | ⬜ Not Deployed |
+| `PS_PaymentService_Test.cls` | MODIFIED - Test class updates | ⬜ Not Deployed |
 
 ### LWC Components
 
@@ -136,7 +143,14 @@ sf project deploy start \
 **Status:** ⬜ Not Started
 
 **Components:**
-- [ ] DFJProductController_Class.cls
+- [ ] DFJProductController_Class.cls (NEW)
+- [ ] DFJProductService_Class.cls (NEW)
+- [ ] DFJ_PaymentController.cls (NEW)
+- [ ] PS_PaymentController.cls (MODIFIED)
+- [ ] PS_PaymentService.cls (MODIFIED)
+- [ ] PS_PaymentUtility.cls (MODIFIED)
+- [ ] PS_PaymentController_Test.cls (MODIFIED)
+- [ ] PS_PaymentService_Test.cls (MODIFIED)
 - [ ] PS_FEAT_ProductSelector.permissionset-meta.xml
 
 **Command:**
@@ -144,8 +158,22 @@ sf project deploy start \
 sf project deploy start \
   --source-dir force-app/main/default/classes/DFJProductController_Class.cls \
   --source-dir force-app/main/default/classes/DFJProductController_Class.cls-meta.xml \
+  --source-dir force-app/main/default/classes/DFJProductService_Class.cls \
+  --source-dir force-app/main/default/classes/DFJProductService_Class.cls-meta.xml \
+  --source-dir force-app/main/default/classes/DFJ_PaymentController.cls \
+  --source-dir force-app/main/default/classes/DFJ_PaymentController.cls-meta.xml \
+  --source-dir force-app/main/default/classes/PS_PaymentController.cls \
+  --source-dir force-app/main/default/classes/PS_PaymentController.cls-meta.xml \
+  --source-dir force-app/main/default/classes/PS_PaymentService.cls \
+  --source-dir force-app/main/default/classes/PS_PaymentService.cls-meta.xml \
+  --source-dir force-app/main/default/classes/PS_PaymentUtility.cls \
+  --source-dir force-app/main/default/classes/PS_PaymentUtility.cls-meta.xml \
+  --source-dir force-app/main/default/classes/PS_PaymentController_Test.cls \
+  --source-dir force-app/main/default/classes/PS_PaymentController_Test.cls-meta.xml \
+  --source-dir force-app/main/default/classes/PS_PaymentService_Test.cls \
+  --source-dir force-app/main/default/classes/PS_PaymentService_Test.cls-meta.xml \
   --source-dir force-app/main/default/permissionsets/PS_FEAT_ProductSelector.permissionset-meta.xml \
-  --target-org my-prod
+  --target-org MyProd
 ```
 
 **Notes:**
@@ -159,7 +187,7 @@ sf project deploy start \
 **Components:**
 - [ ] dfj_ProductSelectorCmp
 - [ ] pS_EnhancedCreatePayment
-- [ ] SF_Add_Bundle_Discounts (Flow v7)
+- [ ] SF_Add_Bundle_Discounts (Flow v8)
 
 **Command:**
 ```bash
@@ -167,7 +195,7 @@ sf project deploy start \
   --source-dir force-app/main/default/lwc/dfj_ProductSelectorCmp \
   --source-dir force-app/main/default/lwc/pS_EnhancedCreatePayment \
   --source-dir force-app/main/default/flows/SF_Add_Bundle_Discounts.flow-meta.xml \
-  --target-org my-prod
+  --target-org MyProd
 ```
 
 **Notes:**
@@ -194,12 +222,65 @@ sf project deploy start \
 
 ## Rollback Plan
 
-If issues occur, rollback in reverse order:
+**Backup Location:** `prod_backup/` folder (created 8 Dec 2025)
 
-1. **LWC Rollback:** Retrieve previous version from production or git
-2. **Apex Rollback:** Retrieve previous version from production or git
-3. **Permission Sets/Custom Permissions:** Can remain (no impact without Apex/LWC)
-4. **CMDT:** Can remain (no impact without Apex/LWC)
+### What Was Backed Up From Production
+
+| Component | Type | Status in Prod |
+|-----------|------|----------------|
+| `PS_PaymentController.cls` | ApexClass | ✅ Backed up |
+| `PS_PaymentService.cls` | ApexClass | ✅ Backed up |
+| `PS_PaymentUtility.cls` | ApexClass | ✅ Backed up |
+| `PS_PaymentController_Test.cls` | ApexClass | ✅ Backed up |
+| `PS_PaymentService_Test.cls` | ApexClass | ✅ Backed up |
+| `pS_EnhancedCreatePayment` | LWC | ✅ Backed up |
+| `SF_Add_Bundle_Discounts` | Flow | ✅ Backed up |
+| `DFJProductController_Class.cls` | ApexClass | ❌ Does not exist (NEW) |
+| `DFJProductService_Class.cls` | ApexClass | ❌ Does not exist (NEW) |
+| `DFJ_PaymentController.cls` | ApexClass | ❌ Does not exist (NEW) |
+| `dfj_ProductSelectorCmp` | LWC | ❌ Does not exist (NEW) |
+
+### Rollback Commands
+
+**If Step 3 (Apex) fails - Rollback modified Apex classes:**
+```bash
+sf project deploy start \
+  --source-dir prod_backup/classes/PS_PaymentController.cls \
+  --source-dir prod_backup/classes/PS_PaymentController.cls-meta.xml \
+  --source-dir prod_backup/classes/PS_PaymentService.cls \
+  --source-dir prod_backup/classes/PS_PaymentService.cls-meta.xml \
+  --source-dir prod_backup/classes/PS_PaymentUtility.cls \
+  --source-dir prod_backup/classes/PS_PaymentUtility.cls-meta.xml \
+  --source-dir prod_backup/classes/PS_PaymentController_Test.cls \
+  --source-dir prod_backup/classes/PS_PaymentController_Test.cls-meta.xml \
+  --source-dir prod_backup/classes/PS_PaymentService_Test.cls \
+  --source-dir prod_backup/classes/PS_PaymentService_Test.cls-meta.xml \
+  --target-org MyProd
+```
+
+**If Step 4 (LWC) fails - Rollback LWC + Flow:**
+```bash
+sf project deploy start \
+  --source-dir prod_backup/lwc/pS_EnhancedCreatePayment \
+  --source-dir prod_backup/flows/SF_Add_Bundle_Discounts.flow-meta.xml \
+  --target-org MyProd
+```
+
+### For NEW Components (Manual Deletion Required)
+
+If you need to remove the NEW components that didn't exist before:
+
+1. **NEW Apex Classes** - Delete via Setup → Apex Classes:
+   - `DFJProductController_Class`
+   - `DFJProductService_Class`
+   - `DFJ_PaymentController`
+
+2. **NEW LWC** - Delete via Setup → Lightning Components:
+   - `dfj_ProductSelectorCmp`
+
+### Notes
+- CMDT, Custom Permissions, and Permission Sets (Step 1) do NOT need rollback - they have no functional impact without the Apex/LWC
+- Step 2 (manual permission assignments) can be revoked manually if needed
 
 ---
 

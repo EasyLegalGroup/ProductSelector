@@ -87,11 +87,18 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     }
 
     get flowInputVariables() {
-         return [ {
-            name: "recordId",
-            type: "String",
-            value: this.recordId
-         } ];
+         return [
+            {
+                name: "recordId",
+                type: "String",
+                value: this.recordId
+            },
+            {
+                name: "pricebookId",
+                type: "String",
+                value: this.selectedPriceBookIdUsingCombobox || ''
+            }
+         ];
     }
 
     @wire(MessageContext)

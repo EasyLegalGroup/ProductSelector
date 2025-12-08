@@ -1,0 +1,435 @@
+<template>
+ 
+    <lightning-button variant="brand" icon-name="utility:billing" label="Create Payment" title="Create payment" disabled={disableButton} onclick={openModel} ></lightning-button>
+
+            <template if:true ={openConfirmationModelOnLead}>
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                    <div class="slds-modal__container">
+                        <div class="slds-m-around_medium">
+                            <template if:true={isLoadedSpinner} class="slds-is-relative">
+                                <lightning-spinner
+                                    alternative-text="Loading..." variant="brand">
+                                </lightning-spinner>
+                             </template>
+         
+                        </div>
+                        <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close" ></lightning-button-icon>
+                
+                        <!-- Modal/Popup Box LWC body starts here -->
+                       
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <fieldset class="slds-box">
+                                <legend class="slds-text-heading_medium slds-text-align_center"><strong>CONFIRM ORDER</strong></legend>
+                                    <div class=" slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-vertical_none">
+                                        <div class="slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-horizontal_none">
+                                            
+                                               
+                                      
+                                            <div class="slds-text-heading_small slds-text-align_left">
+                                            <p><b>Name:</b> {leadAddressInfo.Name}</p>
+                                            </div>
+                                          
+                                           &nbsp;&nbsp;
+                                       
+                                            <div class="slds-text-heading_small  slds-text-align_left">
+                                            <p><b>Email:</b> {leadAddressInfo.Email}</p>
+                                            </div>
+                                           
+                                        &nbsp;&nbsp;
+                                       
+                                            <div class="slds-text-heading_small  slds-text-align_left">
+                                            <p><b>Phone:</b> {leadAddressInfo.Phone_Formatted__c}</p>
+                                            </div>
+                                          
+                                         &nbsp;&nbsp;
+                                       
+                                            <div class="slds-text-heading_small  slds-text-align_left">
+                                            <p><b>Address:</b> {leadAddressInfo.Street}</p></b>
+                                            </div>
+                                            
+                                        &nbsp;&nbsp;
+                                      
+                                            <div class="slds-text-heading_small  slds-text-align_left">
+                                            <p><b>Postal Code / City:</b> {leadAddressInfo.PostalCode} {leadAddressInfo.City}</p>
+                                            </div>
+                                           
+                                      &nbsp;&nbsp;
+                                      
+                                     <div>
+                                        <p> </p>
+                                     </div>
+                                            <div class="slds-text-heading_medium slds-text-align_left">
+                                                <b>Order Information</b>
+                                            </div>&nbsp;&nbsp;
+                                          
+                                            <table class="slds-table slds-table_cell-buffer slds-table_bordered anotherhover " style="table-layout: fixed;">
+                                                <thead>
+                                                  <tr class="slds-line-height_reset">
+                                                    <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                      <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Product Name">Product</div>
+                                                    </th>
+                                                    <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                      <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Item Price">Item price</div>
+                                                    </th>
+                                                    <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                      <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Quantity">Quanity</div>
+                                                    </th>
+                                                    <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                      <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Discount">Discount %</div>
+                                                    </th>
+                                                    <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                                      <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Subtotal">Subtotal</div>
+                                                    </th>
+                                                    
+                                                  </tr>
+                                                </thead>
+                                                <tbody class="">
+                                                   
+                                                   
+                                                        <template for:each={leadProducts} for:item="pro" for:index="tabIndex">
+                                                        
+                                                            <tr  key={pro.Id} class="slds-hint-parent">
+                                                                <th class="slds-cell-wrap" scope="col">
+                                                                    <div class="slds-truncate  slds-text-align_left" title={pro.Name}><b><lightning-formatted-text  value={pro.Name}></lightning-formatted-text></b></div>
+                                                                </th>
+                                                               
+                                                                <th scope="col" class="slds-cell-wrap ">
+                                                                    <div class="slds-truncate slds-text-align_center">
+                                                                        <lightning-formatted-number value={pro.Item_Price__c} format-style="currency"  currency-code={pro.CurrencyIsoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                                        <!--{!pro.CurrencyIsoCode}&nbsp;&nbsp;{!pro.Item_Price__c}-->
+                                                                    </div>
+                                                                </th>
+                                                                <th class="slds-cell-wrap " scope="col">
+                                                    
+                                                                    <div align="right" class="slds-truncate slds-text-align_center">
+                                                                        {pro.Quantity__c}
+                                                                    </div>
+                                                                    
+                                                                </th>
+                                                            <th class="slds-cell-wrap slds-text-align_center" scope="col">
+                                                              
+                                                                    <div align="right" class="slds-truncate slds-text-align_center">
+                                                                        <lightning-formatted-number value={pro.Discount__c}  minimum-fraction-digits="2" maximum-fraction-digits="4" ></lightning-formatted-number>
+                                                                    </div>
+                                                                  
+                                                            </th>
+                                                            <th class="slds-cell-wrap " scope="col">
+                                                                <div class="slds-truncate slds-text-align_center">
+                                                                    <lightning-formatted-number value={pro.totalPrice} format-style="currency"  currency-code={pro.CurrencyIsoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                                    <!--<div class="slds-truncate slds-text-align_center">{!pro.CurrencyIsoCode}&nbsp;&nbsp;{!pro.totalPrice}</div>-->
+                                                                </div>
+                                                            </th>
+                                                             </tr>
+                                                            
+                                                           
+                                                            <!-- End -->
+                                                           
+                                                        </template>
+                                                       
+                                                    
+                                                </tbody>
+                                               
+                                            </table>
+                                            &nbsp;&nbsp;
+
+                                            <lightning-layout multiple-rows="true"> 
+
+
+                                                <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                                    <div class="slds-float_left" title="Fixed Discount"><b>Sub Total</b></div>
+                                                </lightning-layout-item>
+                                                <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12" >
+                                                    <lightning-formatted-number value={orderSubtotal} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                </lightning-layout-item>
+                                                <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12"></lightning-layout-item>
+                                          
+                                          </lightning-layout> &nbsp;&nbsp;
+
+                                            <lightning-layout multiple-rows="true"> 
+
+
+                                                  <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                                      <div class="slds-float_left" title="Fixed Discount"><b>Fixed Discount</b></div>
+                                                  </lightning-layout-item>
+                                                  <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12" >
+                                                      <lightning-formatted-number value={leadAddressInfo.Fixed_discount_Type__c} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                  </lightning-layout-item>
+                                                  <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12"></lightning-layout-item>
+                                            
+                                            </lightning-layout> &nbsp;&nbsp;
+                                           
+                                       
+                                            <lightning-layout multiple-rows="true" > 
+                                               
+                                                <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                                    <div class="slds-float_left" title="Order Total"><b>Order Total</b></div>
+                                                </lightning-layout-item>
+                                                <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                                    <u><lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number></u>
+                                                </lightning-layout-item>
+                                            
+                                            </lightning-layout> &nbsp;&nbsp;
+                                          
+                                        
+                                            <lightning-layout multiple-rows="true"> 
+                                               
+                                                <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-size="12" >
+                                                    <div class="slds-float_left"><b>{subscriptionIncluded}</b></div>
+                                                </lightning-layout-item>
+                                               
+                                            </lightning-layout> 
+                                           
+                                        
+                                        
+                                       </div>
+                                    </div>
+                                </fieldset>
+                        </div>
+                    
+    
+                        <!-- Modal/Popup Box LWC footer starts here -->
+                        <footer class="slds-modal__footer">
+                            <lightning-button variant="brand" onclick={handlePaymentRecordCreation} label="Confirm" name="Confirm" title="Proceed with Payment">Confirm</lightning-button>
+                            <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={closeModal}  style="padding-left: 6px;"></lightning-button>
+                           
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+           
+
+    <template if:true ={openConfirmationModelOnOrder}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close" ></lightning-button-icon>
+                <div class="slds-modal__content slds-p-around_small" id="modal-content-id-2">
+                    <lightning-layout multiple-rows="true">
+                        <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-ize="12">
+                            <div class="slds-align_absolute-center slds-text-heading_medium slds-p-around_medium">
+                                <p>{modelContent}</p>
+                            </div>
+                        </lightning-layout-item>
+                        <div align="right" class="slds-p-around_medium slds-align_absolute-center">
+                            <template if:true={proceedWithPaymentOnOrder}>
+                            <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={closeModal} icon-name="utility:close" icon-position="right" style="padding-left: 6px;"></lightning-button>
+                            </template>
+                         
+                                <div align="right" class="slds-p-around_medium slds-align_absolute-center">
+                                    <lightning-button variant="brand" label={buttonLabelOnOrder} title={buttonLabelOnOrder} disabled={disableOkButton} onclick={handlePaymentRecordCreation} icon-name="utility:check" icon-position="right" ></lightning-button>
+                                </div>
+                          
+                        </div>
+  
+                    </lightning-layout>
+                </div>
+  
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template> 
+
+
+
+    <!--DFJ-80-->
+
+    <template if:true ={openConfirmationModelOnAccount}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <div class="slds-m-around_medium">
+                    <template if:true={isLoadedSpinner} class="slds-is-relative">
+                        <lightning-spinner
+                            alternative-text="Loading..." variant="brand">
+                        </lightning-spinner>
+                     </template>
+ 
+                </div>
+                <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="close" variant="bare-inverse" class="slds-modal__close" ></lightning-button-icon>
+        
+                <!-- Modal/Popup Box LWC body starts here -->
+               
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+                    <fieldset class="slds-box">
+                        <legend class="slds-text-heading_medium slds-text-align_center"><strong>CONFIRM ORDER</strong></legend>
+                            <div class=" slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-vertical_none">
+                                <div class="slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-horizontal_none">
+                                    
+                                       
+                              
+                                    <div class="slds-text-heading_small slds-text-align_left">
+                                    <p><b>Name:</b> {accountInfo.Name}</p>
+                                    </div>
+                                  
+                                   &nbsp;&nbsp;
+                               
+                                    <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Email:</b> {accountInfo.PersonEmail}</p>
+                                    </div>
+                                   
+                                &nbsp;&nbsp;
+                               
+                                    <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Phone:</b> {accountInfo.Phone}</p>
+                                    </div>
+                                  
+                                 &nbsp;&nbsp;
+                               
+                                    <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Address:</b> {addressInfo.Street}</p></b>
+                                    </div>
+                                    
+                                &nbsp;&nbsp;
+                              
+                                    <div class="slds-text-heading_small  slds-text-align_left">
+                                    <p><b>Postal Code / City:</b> {addressInfo.PostalCode} {addressInfo.City}</p>
+                                    </div>
+                                   
+                              &nbsp;&nbsp;
+                              
+                             <div>
+                                <p> </p>
+                             </div>
+                                    <div class="slds-text-heading_medium slds-text-align_left">
+                                        <b>Order Information</b>
+                                    </div>&nbsp;&nbsp;
+                                  
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered anotherhover " style="table-layout: fixed;">
+                                        <thead>
+                                          <tr class="slds-line-height_reset">
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                              <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Product Name">Product</div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                              <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Item Price">Item price</div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                              <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Quantity">Quanity</div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                              <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Discount">Discount %</div>
+                                            </th>
+                                            <th class="slds-text-title_caps slds-cell-wrap" scope="col">
+                                              <div class="slds-truncate slds-text-align_center slds-p-around_x-small" title="Subtotal">Subtotal</div>
+                                            </th>
+                                            
+                                          </tr>
+                                        </thead>
+                                        <tbody class="">
+                                           
+                                           
+                                                <template for:each={orderProducts} for:item="pro" for:index="tabIndex">
+                                                
+                                                    <tr  key={pro.Id} class="slds-hint-parent">
+                                                        <th class="slds-cell-wrap" scope="col">
+                                                            <div class="slds-truncate  slds-text-align_left" title={pro.Name}><b><lightning-formatted-text  value={pro.Name}></lightning-formatted-text></b></div>
+                                                        </th>
+                                                       
+                                                        <th scope="col" class="slds-cell-wrap ">
+                                                            <div class="slds-truncate slds-text-align_center">
+                                                                <lightning-formatted-number value={pro.UnitPrice} format-style="currency"  currency-code={pro.CurrencyIsoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                                <!--{!pro.CurrencyIsoCode}&nbsp;&nbsp;{!pro.Item_Price__c}-->
+                                                            </div>
+                                                        </th>
+                                                        <th class="slds-cell-wrap " scope="col">
+                                            
+                                                            <div align="right" class="slds-truncate slds-text-align_center">
+                                                                {pro.Quantity}
+                                                            </div>
+                                                            
+                                                        </th>
+                                                    <th class="slds-cell-wrap slds-text-align_center" scope="col">
+                                                      
+                                                            <div align="right" class="slds-truncate slds-text-align_center">
+                                                                <lightning-formatted-number value={pro.Discount__c}  minimum-fraction-digits="2" maximum-fraction-digits="4" ></lightning-formatted-number>
+                                                            </div>
+                                                          
+                                                    </th>
+                                                    <th class="slds-cell-wrap " scope="col">
+                                                        <div class="slds-truncate slds-text-align_center">
+                                                            <lightning-formatted-number value={pro.totalPrice} format-style="currency"  currency-code={pro.CurrencyIsoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                                            <!--<div class="slds-truncate slds-text-align_center">{!pro.CurrencyIsoCode}&nbsp;&nbsp;{!pro.totalPrice}</div>-->
+                                                        </div>
+                                                    </th>
+                                                     </tr>
+                                                    
+                                                   
+                                                    <!-- End -->
+                                                   
+                                                </template>
+                                               
+                                            
+                                        </tbody>
+                                       
+                                    </table>
+                                    &nbsp;&nbsp;
+
+                                    <lightning-layout multiple-rows="true"> 
+
+
+                                        <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                            <div class="slds-float_left" title="Fixed Discount"><b>Sub Total</b></div>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12" >
+                                            <lightning-formatted-number value={orderSubtotal} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12"></lightning-layout-item>
+                                  
+                                  </lightning-layout> &nbsp;&nbsp;
+
+                                    <lightning-layout multiple-rows="true"> 
+
+
+                                          <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                              <div class="slds-float_left" title="Fixed Discount"><b>Fixed Discount</b></div>
+                                          </lightning-layout-item>
+                                          <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12" >
+                                              <lightning-formatted-number value={orderFixedDiscount} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number>
+                                          </lightning-layout-item>
+                                          <lightning-layout-item size="12" large-device-size="6" medium-device-size="6" small-device-size="12"></lightning-layout-item>
+                                    
+                                    </lightning-layout> &nbsp;&nbsp;
+                                   
+                               
+                                    <lightning-layout multiple-rows="true" > 
+                                       
+                                        <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                            <div class="slds-float_left" title="Order Total"><b>Order Total</b></div>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item size="12" large-device-size="2" medium-device-size="2" small-device-size="12">
+                                            <u><lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode} currency-display-as="symbol" ></lightning-formatted-number></u>
+                                        </lightning-layout-item>
+                                    
+                                    </lightning-layout> &nbsp;&nbsp;
+                                  
+                                
+                                    <lightning-layout multiple-rows="true"> 
+                                       
+                                        <lightning-layout-item size="12" large-device-size="12" medium-device-size="12" small-device-size="12" >
+                                            <div class="slds-float_left"><b>{subscriptionIncluded}</b></div>
+                                        </lightning-layout-item>
+                                       
+                                    </lightning-layout> 
+                                   
+                                
+                                
+                               </div>
+                            </div>
+                        </fieldset>
+                </div>
+            
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="brand" onclick={handlePaymentRecordCreation} label="Confirm" name="Confirm" title="Proceed with Payment">Confirm</lightning-button>
+                    <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={closeModal}  style="padding-left: 6px;"></lightning-button>
+                   
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    
+
+
+</template>
