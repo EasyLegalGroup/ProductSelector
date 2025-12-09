@@ -270,7 +270,8 @@ getAddressInfoFromLeadOROrder_helper(){
     
     handlePaymentRecordCreation(event){
         try {
-            let buttonlabel = event.target.label;
+            // Use dataset.label for native buttons, or label for lightning-button
+            let buttonlabel = event.currentTarget.dataset.label || event.target.label;
             if(buttonlabel == 'Confirm' && this.leadAddressInfo.Email && this.leadAddressInfo.Name){
                
                 this.openConfirmationModelOnLead = false; 

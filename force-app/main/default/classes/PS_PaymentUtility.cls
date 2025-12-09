@@ -284,6 +284,28 @@ public with sharing class PS_PaymentUtility {
 
         InvoiceWrapper invoiceWrapperInstance = new InvoiceWrapper();
 
+        // Query VAT configuration from Price_Book__mdt based on the payment's pricebook
+        Decimal vatRate = null; // Default: don't send vat (use Reepay account default)
+        Boolean amountIncludesVat = true; // Default: prices include VAT (Denmark/Sweden)
+        
+        if (payment.Pricebook2Id__c != null) {
+            // Get the Internal_Identifier__c from the Pricebook2
+            List<Pricebook2> pricebooks = [SELECT Internal_Identifier__c FROM Pricebook2 WHERE Id = :payment.Pricebook2Id__c LIMIT 1];
+            if (!pricebooks.isEmpty() && String.isNotBlank(pricebooks[0].Internal_Identifier__c)) {
+                // Query Price_Book__mdt for VAT configuration
+                List<Price_Book__mdt> priceBookConfigs = [
+                    SELECT VAT_Rate__c, Amount_Includes_VAT__c 
+                    FROM Price_Book__mdt 
+                    WHERE Internal_Identifier__c = :pricebooks[0].Internal_Identifier__c 
+                    LIMIT 1
+                ];
+                if (!priceBookConfigs.isEmpty()) {
+                    vatRate = priceBookConfigs[0].VAT_Rate__c;
+                    amountIncludesVat = priceBookConfigs[0].Amount_Includes_VAT__c;
+                    System.debug('VAT Config from Price_Book__mdt - VAT Rate: ' + vatRate + ', Amount Includes VAT: ' + amountIncludesVat);
+                }
+            }
+        }
 
         List<PaymentOrderLineWrapper> paymentOrderItems = new List<PaymentOrderLineWrapper>();
         Integer count = 0;
@@ -296,6 +318,11 @@ public with sharing class PS_PaymentUtility {
             singlePaymentOrderItem.amount = polLoop.Amount__c * 100;
             singlePaymentOrderItem.quantity = polLoop.Quantity__c;
             singlePaymentOrderItem.ordertext = polLoop.Name;
+            // Apply VAT configuration to order line
+            if (vatRate != null) {
+                singlePaymentOrderItem.vat = vatRate;
+            }
+            singlePaymentOrderItem.amount_incl_vat = amountIncludesVat;
             paymentOrderItems.add(singlePaymentOrderItem);
             totalProductAmount += (polLoop.Amount__c * polLoop.Quantity__c); // Add to total
         }
@@ -326,6 +353,11 @@ public with sharing class PS_PaymentUtility {
                         singlePaymentOrderItem.amount = totalPrice * 100;
                         singlePaymentOrderItem.quantity = (Decimal) subscriptionProduct.get('Quantity');
                         singlePaymentOrderItem.ordertext = (String) subscriptionProduct.get('Name');
+                        // Apply VAT configuration to order line
+                        if (vatRate != null) {
+                            singlePaymentOrderItem.vat = vatRate;
+                        }
+                        singlePaymentOrderItem.amount_incl_vat = amountIncludesVat;
 
                         paymentOrderItems.add(singlePaymentOrderItem);
                         totalProductAmount += totalPrice; // Add to total
@@ -344,6 +376,11 @@ public with sharing class PS_PaymentUtility {
                         //End
                         singlePaymentOrderItem.quantity = (Decimal) subscriptionProduct.get('Quantity__c');
                         singlePaymentOrderItem.ordertext = (String) subscriptionProduct.get('Product_Name__c');
+                        // Apply VAT configuration to order line
+                        if (vatRate != null) {
+                            singlePaymentOrderItem.vat = vatRate;
+                        }
+                        singlePaymentOrderItem.amount_incl_vat = amountIncludesVat;
                         paymentOrderItems.add(singlePaymentOrderItem);
                         totalProductAmount += subTotal; // Add to total
                     }
@@ -362,6 +399,11 @@ public with sharing class PS_PaymentUtility {
             singlePaymentItem.amount = discountAmount * 100 * (-1);
             singlePaymentItem.quantity = 1 ;
             singlePaymentItem.ordertext = 'Discount';
+            // Apply VAT configuration to discount line
+            if (vatRate != null) {
+                singlePaymentItem.vat = vatRate;
+            }
+            singlePaymentItem.amount_incl_vat = amountIncludesVat;
             paymentOrderItems.add(singlePaymentItem);
         }
         //End
@@ -530,6 +572,7 @@ public with sharing class PS_PaymentUtility {
     }
 
     public class CustomerResponseWrapper{
+        public Integer code; // Frisbii/Reepay API error code (e.g., 9 = Customer not found)
         public String error;
         public String message;
         public Integer http_status;

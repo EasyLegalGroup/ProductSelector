@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Amount_Includes_VAT__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>If checked (true), the prices in this pricebook already include VAT. If unchecked (false), prices are excluding VAT and VAT will be added by Reepay/Frisbii. Denmark/Sweden = true (prices incl. VAT), Ireland = false (prices excl. VAT).</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Check if prices in this pricebook include VAT. Uncheck for markets where prices are shown excluding VAT (e.g., Ireland).</inlineHelpText>
+    <label>Amount Includes VAT</label>
+    <type>Checkbox</type>
+</CustomField>

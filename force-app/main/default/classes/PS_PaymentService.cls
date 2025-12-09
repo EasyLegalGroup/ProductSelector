@@ -1065,6 +1065,73 @@ public with sharing class PS_PaymentService {
         return customerResponseWrapperInstance;
     }
 
+    /**
+     * @description Creates a minimal customer in Reepay using just the email as handle.
+     *              This is used as a fallback when createReepayCustomerInvoice gets a 404 "Customer not found".
+     * @param email The customer email (used as the handle)
+     * @param pricebookId The Pricebook2 Id to get the correct Reepay private key
+     * @return CustomerResponseWrapper with result of customer creation
+     */
+    public static PS_PaymentUtility.CustomerResponseWrapper createReepayCustomerByEmail(String email, Id pricebookId) {
+        System.debug('=== PS_PaymentService.createReepayCustomerByEmail START ===');
+        System.debug('Email/Handle: ' + email);
+        System.debug('PricebookId: ' + pricebookId);
+        
+        PS_PaymentUtility.CustomerResponseWrapper customerResponseWrapperInstance = new PS_PaymentUtility.CustomerResponseWrapper();
+        
+        try {
+            String reepayPrivateKey = getReepayPrivateKeyByPricebook(pricebookId);
+            String endpointUrl = customerCreationURL;
+            
+            // Build minimal customer request body
+            Map<String, Object> customerBody = new Map<String, Object>();
+            customerBody.put('handle', email);
+            customerBody.put('email', email);
+            customerBody.put('generate_handle', false);
+            
+            String requestBody = JSON.serialize(customerBody);
+            System.debug('Request Body: ' + requestBody);
+            
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(endpointUrl);
+            request.setMethod('POST');
+            request.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
+            request.setHeader('Accept', 'application/json');
+            request.setHeader('Content-Type', 'application/json');
+            request.setTimeout(120000);
+            request.setBody(requestBody);
+            
+            Http http = new Http();
+            HttpResponse response = http.send(request);
+            System.debug('Response Status Code: ' + response.getStatusCode());
+            System.debug('Response Body: ' + response.getBody());
+            
+            if (response.getStatusCode() == 200) {
+                customerResponseWrapperInstance.message = 'Customer created successfully';
+                System.debug('=== PS_PaymentService.createReepayCustomerByEmail END (success) ===');
+                return customerResponseWrapperInstance;
+            } else if (response.getStatusCode() == 400 && !String.isBlank(response.getBody())) {
+                PS_PaymentUtility.CustomerResponseWrapper customerResponse = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
+                // If customer already exists, that's fine - we can proceed with invoice creation
+                if (customerResponse.message != null && customerResponse.message.equals('customer already exists')) {
+                    customerResponseWrapperInstance.message = customerResponse.message;
+                    System.debug('=== PS_PaymentService.createReepayCustomerByEmail END (already exists) ===');
+                    return customerResponseWrapperInstance;
+                } else {
+                    customerResponseWrapperInstance.error = customerResponse.error;
+                }
+            } else {
+                customerResponseWrapperInstance.error = 'Unable to create customer: HTTP ' + response.getStatusCode();
+            }
+        } catch (Exception ex) {
+            customerResponseWrapperInstance.error = ex.getMessage();
+            DFJ_ErrorLogController.addErrorLogs('', 'Creating reepayCustomerByEmail', ex.getMessage(), 'Error', 'PS_PaymentService.createReepayCustomerByEmail', '', String.valueOf(ex.getLineNumber()));
+        }
+        
+        System.debug('=== PS_PaymentService.createReepayCustomerByEmail END (error) ===');
+        return customerResponseWrapperInstance;
+    }
+
     /*
     * @Description  method to create the invoice record.
     * @Param        recordId
@@ -1120,9 +1187,68 @@ public with sharing class PS_PaymentService {
                     // Start
                     if (!String.isBlank(response.getBody())) {
                         PS_PaymentUtility.CustomerResponseWrapper customerResponse = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(response.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
-                        payment.Error_message__c = String.isNotBlank(customerResponse.error) ? customerResponse.error : customerResponse.message;
-                        payment.Invoice_created__c = false;
-                        responseWrapperIns.error = String.isNotBlank(customerResponse.error) ? customerResponse.error : customerResponse.message;
+                        
+                        // DFJ-XXX: Handle "Customer not found" (error code 9) by creating the customer and retrying
+                        // This handles race conditions and eventual consistency issues with Reepay API
+                        if (response.getStatusCode() == 404 && customerResponse.code == 9) {
+                            System.debug('Customer not found (code 9) - attempting to create customer and retry invoice creation');
+                            
+                            // Create the customer
+                            PS_PaymentUtility.CustomerResponseWrapper createCustomerResult = createReepayCustomerByEmail(currentEmail, payment.Pricebook2Id__c);
+                            
+                            if (String.isBlank(createCustomerResult.error)) {
+                                System.debug('Customer created successfully, retrying invoice creation...');
+                                
+                                // Retry the invoice creation
+                                HttpRequest retryRequest = new HttpRequest();
+                                retryRequest.setEndpoint(endpointUrl);
+                                retryRequest.setMethod('POST');
+                                retryRequest.setHeader('Authorization', 'Basic ' + reepayPrivateKey);
+                                retryRequest.setHeader('Accept', 'application/json');
+                                retryRequest.setHeader('Content-Type', 'application/json');
+                                retryRequest.setTimeout(120000);
+                                retryRequest.setBody(requestBody);
+                                
+                                HttpResponse retryResponse = http.send(retryRequest);
+                                
+                                if (retryResponse.getStatusCode() == 200 && !String.isBlank(retryResponse.getBody())) {
+                                    // Parse the invoice wrapper on the creation of the invoice
+                                    PS_PaymentUtility.GetInvoiceWrapper getInvoiceWrapperInstance = PS_PaymentUtility.parseReepayInvoice(retryResponse.getBody());
+                                    
+                                    if (String.isBlank(getInvoiceWrapperInstance.errorMessage)) {
+                                        payment.Invoice_unique_handle__c = getInvoiceWrapperInstance.handle;
+                                        payment.Status__c = getInvoiceWrapperInstance.state;
+                                        payment.Invoice_id__c = getInvoiceWrapperInstance.id;
+                                    }
+                                    payment.Invoice_created__c = true;
+                                    responseWrapperIns.message = 'Created invoice (after customer auto-creation)';
+                                    System.debug('Invoice created successfully on retry');
+                                } else {
+                                    // Retry also failed
+                                    if (!String.isBlank(retryResponse.getBody())) {
+                                        PS_PaymentUtility.CustomerResponseWrapper retryError = (PS_PaymentUtility.CustomerResponseWrapper) JSON.deserialize(retryResponse.getBody(), PS_PaymentUtility.CustomerResponseWrapper.class);
+                                        payment.Error_message__c = String.isNotBlank(retryError.error) ? retryError.error : retryError.message;
+                                        responseWrapperIns.error = String.isNotBlank(retryError.error) ? retryError.error : retryError.message;
+                                    } else {
+                                        payment.Error_message__c = 'Invoice creation failed on retry';
+                                        responseWrapperIns.error = 'Invoice creation failed on retry';
+                                    }
+                                    payment.Invoice_created__c = false;
+                                    DFJ_ErrorLogController.addErrorLogs('', 'Invoice creation retry failed after customer auto-creation', responseWrapperIns.error, 'Error', 'PS_PaymentService.createReepayCustomerInvoice', '', '');
+                                }
+                            } else {
+                                // Could not create customer
+                                payment.Error_message__c = 'Customer not found and could not be created: ' + createCustomerResult.error;
+                                payment.Invoice_created__c = false;
+                                responseWrapperIns.error = payment.Error_message__c;
+                                DFJ_ErrorLogController.addErrorLogs('', 'Failed to auto-create customer after "Customer not found" error', createCustomerResult.error, 'Error', 'PS_PaymentService.createReepayCustomerInvoice', '', '');
+                            }
+                        } else {
+                            // Other errors - handle as before
+                            payment.Error_message__c = String.isNotBlank(customerResponse.error) ? customerResponse.error : customerResponse.message;
+                            payment.Invoice_created__c = false;
+                            responseWrapperIns.error = String.isNotBlank(customerResponse.error) ? customerResponse.error : customerResponse.message;
+                        }
                     } else {
                         String errorMsg = 'Error in Class: PS_PaymentService, Method:createReepayCustomerInvoice(), Response code not 200 and got an empty response body.';
                         payment.Error_message__c = errorMsg;
@@ -1710,7 +1836,7 @@ public with sharing class PS_PaymentService {
                     }
 
                     addressFields = addressFields.removeEnd(',');
-                    String query = 'SELECT uuid__c, Id, version__c,Journal__c' + (String.isNotBlank(addressFields) ? ',' + addressFields : '') + ' FROM ' + recordFormConfigurationInstance[0].Journal_Object__c + ' WHERE Id =\'' + journalRecordList[0].Id + '\'' + ' OR uuid__c =\'' + journalRecordList[0].External_record_uuid__c + '\' LIMIT 1';
+                    String query = 'SELECT uuid__c, Id, version__c' + (String.isNotBlank(addressFields) ? ',' + addressFields : '') + ' FROM ' + recordFormConfigurationInstance[0].Journal_Object__c + ' WHERE Id =\'' + journalRecordList[0].Id + '\'' + ' OR uuid__c =\'' + journalRecordList[0].External_record_uuid__c + '\' LIMIT 1';
 
                     List<SObject> journalRecord = Database.query(query);
                     if (!journalRecord.isEmpty()) {

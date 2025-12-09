@@ -174,7 +174,7 @@ public without sharing class DFJProductController_Class {
                 
                 // Build condition to filter by accessible pricebooks
                 String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
-                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE AND Internal_Identifier__c IN (' + identifierStr + ')';
+                condition = 'IsActive = TRUE AND IsStandard = false AND Internal_Identifier__c IN (' + identifierStr + ')';
                 
                 // Also filter by Market_Unit if available
                 if (String.isNotBlank(marketUnitFilterValueToUseToFilterPricebooks)) {
@@ -203,7 +203,7 @@ public without sharing class DFJProductController_Class {
                     }
                     
                     String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
-                    condition = 'IsActive = true AND IsStandard = false AND Is_Opportunity_PriceBook__c = true AND Internal_Identifier__c IN (' + identifierStr + ')';
+                    condition = 'IsActive = true AND IsStandard = false AND Internal_Identifier__c IN (' + identifierStr + ')';
                     
                     if (currencyConfigurationMetadata != null && String.isNotBlank(currencyConfigurationMetadata.CurrencyIsoCode__c)) {
                         condition += ' AND CurrencyIsoCode = \'' + currencyConfigurationMetadata.CurrencyIsoCode__c + '\'';
@@ -216,7 +216,7 @@ public without sharing class DFJProductController_Class {
             // For Lead: if no pricebooks found with Market_Unit filter, try without it
             if (objectApiName == 'Lead' && listOfPricebooks.isEmpty() && !accessibleIdentifiers.isEmpty()) {
                 String identifierStr = '\'' + String.join(new List<String>(accessibleIdentifiers), '\',\'') + '\'';
-                condition = 'IsActive = TRUE AND Is_Opportunity_PriceBook__c = FALSE AND Internal_Identifier__c IN (' + identifierStr + ')';
+                condition = 'IsActive = TRUE AND IsStandard = false AND Internal_Identifier__c IN (' + identifierStr + ')';
                 listOfPricebooks = fetchRecordsDynamically(condition, fieldsList, 'Pricebook2', limitVar);
             }
             
@@ -241,11 +241,15 @@ public without sharing class DFJProductController_Class {
                 priceBookIdVSPricebookEntries.get(pbe.PriceBook2.Id).add(pbe);
             }
             
-            // Build map of Internal_Identifier__c to Icon from Price_Book__mdt
+            // Build maps of Internal_Identifier__c to Icon, VAT Rate, and Amount Includes VAT from Price_Book__mdt
             Map<String, String> identifierToIcon = new Map<String, String>();
-            for (Price_Book__mdt pbConfig : [SELECT Internal_Identifier__c, Icon__c FROM Price_Book__mdt]) {
+            Map<String, Decimal> identifierToVatRate = new Map<String, Decimal>();
+            Map<String, Boolean> identifierToAmountIncludesVat = new Map<String, Boolean>();
+            for (Price_Book__mdt pbConfig : [SELECT Internal_Identifier__c, Icon__c, VAT_Rate__c, Amount_Includes_VAT__c FROM Price_Book__mdt]) {
                 String icon = String.isNotBlank(pbConfig.Icon__c) ? pbConfig.Icon__c : 'standard:price_books';
                 identifierToIcon.put(pbConfig.Internal_Identifier__c, icon);
+                identifierToVatRate.put(pbConfig.Internal_Identifier__c, pbConfig.VAT_Rate__c);
+                identifierToAmountIncludesVat.put(pbConfig.Internal_Identifier__c, pbConfig.Amount_Includes_VAT__c);
             }
             
             for (Pricebook2 pb : listOfPricebooks){
@@ -256,6 +260,11 @@ public without sharing class DFJProductController_Class {
                 productInstance.icon = identifierToIcon.containsKey(pb.Internal_Identifier__c) 
                     ? identifierToIcon.get(pb.Internal_Identifier__c) 
                     : 'standard:price_books';
+                // Set VAT configuration from CMDT
+                productInstance.vatRate = identifierToVatRate.get(pb.Internal_Identifier__c);
+                productInstance.amountIncludesVat = identifierToAmountIncludesVat.containsKey(pb.Internal_Identifier__c)
+                    ? identifierToAmountIncludesVat.get(pb.Internal_Identifier__c)
+                    : true; // Default to true (prices include VAT) if not configured
                 productDataWithPriceBooksList.add(productInstance);
             }
             List<sObject> childProducts = new List<sObject>();
@@ -318,5 +327,7 @@ public without sharing class DFJProductController_Class {
         @AuraEnabled public Pricebook2 pb2;
         @AuraEnabled public List<PricebookEntry> pbeList;
         @AuraEnabled public String icon;
+        @AuraEnabled public Decimal vatRate; // VAT rate as decimal (e.g., 0.25 for 25%)
+        @AuraEnabled public Boolean amountIncludesVat; // If true, prices already include VAT
     }
 }

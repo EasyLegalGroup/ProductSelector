@@ -293,6 +293,67 @@ If you need to remove the NEW components that didn't exist before:
 
 ---
 
+---
+
+## 📌 Pinned: Address Fetching Fix for Denmark Record Model 160
+
+**Issue:** `getAddressInfoFromLeadOROrder` in `PS_PaymentService.cls` fails for Leads with Journals using Record Model 160.
+
+**Root Cause:** The method queries `df_160_person__c` directly by `Journal__c.Id`, but `df_160_person__c` doesn't have a direct `Journal__c` lookup. It needs to traverse: `Journal__c` → `df_journal_dk_new__c` → `df_160_person__c`.
+
+**Required Fix:**
+1. Add special case when `Journal_Object__c = 'df_160_person__c'`
+2. Change WHERE clause to use `journal_dk_new__r.Journal__c = :journalId`
+3. Add filter `person_hidden_person_1__c = true` to get primary person only
+4. Fetch address fields: `person_adresse__c` (street), `person_postnummer__c` (zip), `person_by__c` (city)
+
+**Workaround Applied:** Created `Journal__c` field on `df_160_person__c` in production (temporary fix).
+
+**Status:** Deferred - needs proper implementation
+
+---
+
+## VAT Handling Feature (Ireland excl. VAT)
+
+**Purpose:** Allow dynamic VAT configuration per pricebook to support markets where prices are shown excluding VAT (e.g., Ireland 23%) vs. including VAT (e.g., Denmark/Sweden 25%).
+
+### New CMDT Fields on Price_Book__mdt
+
+| Field | Type | Description | Status |
+|-------|------|-------------|--------|
+| `VAT_Rate__c` | Number(5,4) | VAT rate as decimal (e.g., 0.25 for 25%, 0.23 for 23%) | ✅ Deployed to Sandbox |
+| `Amount_Includes_VAT__c` | Checkbox | If true, prices include VAT. If false, VAT will be added by Reepay. | ✅ Deployed to Sandbox |
+
+### Configuration Examples
+
+| Pricebook | VAT_Rate__c | Amount_Includes_VAT__c | Behavior |
+|-----------|-------------|------------------------|----------|
+| Din Familiejurist (DK) | 0.25 | ✅ true | 250 DKK shown = 250 DKK charged (includes 50 DKK VAT) |
+| Familjeavtal (SE) | 0.25 | ✅ true | 250 SEK shown = 250 SEK charged (includes 50 SEK VAT) |
+| Here's Law (IE) | 0.23 | ❌ false | 250 EUR shown = 307.50 EUR charged (250 + 57.50 VAT) |
+
+### Code Changes
+
+- **PS_PaymentUtility.constructInvoiceRequestBody()**: Now queries `Price_Book__mdt` for VAT config and applies `vat` and `amount_incl_vat` to each order line sent to Reepay/Frisbii API.
+
+### Sandbox Deployment
+
+| Date | Deploy ID | Components | Result |
+|------|-----------|------------|--------|
+| 9 Dec 2025 | 0AfG500000OeGrSKAV | VAT_Rate__c, Amount_Includes_VAT__c, PS_PaymentUtility.cls | ✅ Success |
+
+### Production Deployment
+
+**Status:** Not yet deployed - requires testing in sandbox first
+
+**Next Steps:**
+1. Configure VAT settings on Price_Book__mdt records in sandbox
+2. Test payment creation with Ireland pricebook (verify VAT is added correctly)
+3. Test payment creation with DK/SE pricebook (verify no change in behavior)
+4. Deploy to production
+
+---
+
 ## Deployment Log
 
 | Date | Step | Deployed By | Result | Notes |
@@ -300,4 +361,5 @@ If you need to remove the NEW components that didn't exist before:
 | 8 Dec 2025 | Step 1 | Copilot | ✅ Success | Deploy ID: 0AfW5000001cj3ZKAQ - CMDT, Custom Permissions, 4 Permission Sets |
 | 8 Dec 2025 | Step 3 | Copilot | ✅ Success | Validated Deploy ID: 0AfW5000001cl8b - 15 Apex classes (767 tests passed) |
 | 8 Dec 2025 | Step 4 | Copilot | ✅ Success | Deploy ID: 0AfW5000001clwbKAA - 4 LWC, 1 Flow, 1 Static Resource, 1 Permission Set |
-
+| 9 Dec 2025 | Sandbox Sync | Copilot | ✅ Success | Deploy ID: 0AfG500000OeKgXKAV - Synced prod changes (Is_Opp_Pricebook removal, button labels, customer retry) |
+| 9 Dec 2025 | VAT Feature | Copilot | ✅ Success | Deploy ID: 0AfG500000OeGrSKAV - VAT CMDT fields + PS_PaymentUtility.cls |

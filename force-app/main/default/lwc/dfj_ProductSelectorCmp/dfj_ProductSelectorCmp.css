@@ -648,6 +648,44 @@ lightning-layout-item[padding="around-small"] {
   color: #cbd5e1;
 }
 
+/* Subtotal Row - for excl. VAT markets */
+.summary-row-subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem 0;
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 6px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.subtotal-icon {
+  --slds-c-icon-color-foreground-default: #64748b;
+}
+
+.summary-value-subtotal {
+  font-weight: 700;
+  color: #334155;
+}
+
+/* VAT Row */
+.summary-row-vat {
+  padding: 0.375rem 1rem;
+  margin: 0.125rem 0;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 4px;
+}
+
+.vat-icon {
+  --slds-c-icon-color-foreground-default: #d97706;
+}
+
+.vat-value {
+  color: #92400e;
+  font-weight: 600;
+}
+
 /* Total Row - Compact */
 .summary-total-row {
   display: flex;

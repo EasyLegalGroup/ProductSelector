@@ -300,14 +300,47 @@
               </div>
             </div>
 
+            <!-- Subtotal Row (before VAT for excl. VAT markets) -->
+            <template if:true={showVatExcludedTotal}>
+              <div class="summary-row summary-row-subtotal">
+                <div class="summary-label">
+                  <lightning-icon icon-name="utility:money" size="x-small" class="subtotal-icon"></lightning-icon>
+                  <span>Subtotal</span>
+                </div>
+                <div class="summary-value summary-value-subtotal">
+                  <lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode}
+                    currency-display-as="symbol"></lightning-formatted-number>
+                </div>
+              </div>
+            </template>
+
+            <!-- VAT Row - Shows for all markets with VAT configured -->
+            <template if:true={hasVatConfig}>
+              <div class="summary-row summary-row-vat">
+                <div class="summary-label summary-label-indent">
+                  <lightning-icon icon-name="utility:cases" size="xx-small" class="vat-icon"></lightning-icon>
+                  <span>{vatDisplayText}</span>
+                </div>
+                <div class="summary-value vat-value">
+                  <lightning-formatted-number value={vatAmount} format-style="currency" currency-code={isoCode}
+                    currency-display-as="symbol"></lightning-formatted-number>
+                </div>
+              </div>
+            </template>
+
             <!-- Total Row - Grand Finale -->
             <div class="summary-total-row">
               <div class="summary-label summary-label-total">
                 <lightning-icon icon-name="utility:money" size="x-small" class="total-icon"></lightning-icon>
-                <span>Total</span>
+                <template if:true={showVatExcludedTotal}>
+                  <span>Total incl. VAT</span>
+                </template>
+                <template if:false={showVatExcludedTotal}>
+                  <span>Total</span>
+                </template>
               </div>
               <div class="summary-value summary-value-total">
-                <lightning-formatted-number value={orderTotal} format-style="currency" currency-code={isoCode}
+                <lightning-formatted-number value={grandTotalWithVat} format-style="currency" currency-code={isoCode}
                   currency-display-as="symbol"></lightning-formatted-number>
               </div>
             </div>

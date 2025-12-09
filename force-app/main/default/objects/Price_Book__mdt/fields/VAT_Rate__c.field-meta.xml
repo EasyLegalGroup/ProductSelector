@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>VAT_Rate__c</fullName>
+    <description>The VAT rate for this pricebook as a decimal (e.g., 0.25 for 25%, 0.23 for 23%). Used when sending invoices to Reepay/Frisbii.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Enter the VAT rate as a decimal. Examples: 0.25 (Denmark 25%), 0.23 (Ireland 23%), 0 (no VAT)</inlineHelpText>
+    <label>VAT Rate</label>
+    <precision>5</precision>
+    <required>false</required>
+    <scale>4</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

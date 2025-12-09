@@ -45,6 +45,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     @track isOpportunityObjectType = false;//Added by Kajal at 11.11
     @track isPaymentInProgress = false;
     @track permissionError = null; // Track permission errors
+    // VAT configuration from Price_Book__mdt
+    @track vatRate = null; // VAT rate as decimal (e.g., 0.25 for 25%)
+    @track amountIncludesVat = true; // If true, prices already include VAT
     isPaymentCreated = false;
     priceBookOptionsForCombobox = [];
     priceBookIconOptions = []; // Icon picker options with icon, label, value
@@ -52,6 +55,53 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
     @track fieldApiMap = {
         Lead : {'Id':'Id','Discount':'Discount__c','UnitPrice':'Item_Price__c','Parent':'Lead__c','Name':'Name','Pricebook_Id__c':'Pricebook_Id__c','isSubscription':'Is_subscription__c','PlanHandle':'Plan_handle__c','CurrencyIsoCode':'CurrencyIsoCode','PriceBookEntry':'PricebookEntry_Id__c','ProductId':'Product_Id__c','ProductName':'Product_Name__c', 'Quantity':'Quantity__c','PartnerProvisionValue':'Partner_Provision_Value__c','PartnerSalesValue':'Partner_Sales_Value__c','ProvisionBase':'Provision_Base__c'},
         Opportunity : {'Id':'Id','TotalPrice':'TotalPrice','ListPrice':'ListPrice','UnitPrice':'UnitPrice','NetTotalPrice':'Net_Total_Price__c', 'Name':'Product2.Name','Pricebook_Id__c':'Pricebook_Id__c','isSubscription':'Is_subscription__c','PlanHandle':'Plan_handle__c','PriceBookEntry':'PricebookEntryId','ProductId':'Product2Id','Quantity':'Quantity','PartnerProvisionValue':'Partner_Provision_Value__c','PartnerSalesValue':'Partner_Sales_Value__c','ProvisionBase':'Provision_Base__c', 'CurrencyIsoCode':'Opportunity.CurrencyIsoCode'}
+    }
+
+    // VAT calculation getters
+    get hasVatConfig() {
+        return this.vatRate !== null && this.vatRate !== undefined && this.vatRate > 0;
+    }
+
+    get vatPercentage() {
+        return this.vatRate ? (this.vatRate * 100).toFixed(0) : 0;
+    }
+
+    // Calculate VAT amount based on whether prices include VAT
+    get vatAmount() {
+        if (!this.hasVatConfig || !this.orderTotal) return 0;
+        
+        if (this.amountIncludesVat) {
+            // Prices include VAT: extract VAT from total (e.g., 5000 / 1.25 * 0.25 = 1000 VAT)
+            return parseFloat((this.orderTotal - (this.orderTotal / (1 + this.vatRate))).toFixed(2));
+        } else {
+            // Prices exclude VAT: add VAT to total (e.g., 400 * 0.23 = 92 VAT)
+            return parseFloat((this.orderTotal * this.vatRate).toFixed(2));
+        }
+    }
+
+    // Final total including VAT (for excl. VAT markets like Ireland)
+    get grandTotalWithVat() {
+        if (!this.hasVatConfig || this.amountIncludesVat) {
+            return this.orderTotal;
+        }
+        // For excl. VAT: add VAT to get final amount
+        return parseFloat((parseFloat(this.orderTotal) + this.vatAmount).toFixed(2));
+    }
+
+    // Display text for VAT row
+    get vatDisplayText() {
+        if (!this.hasVatConfig) return '';
+        
+        if (this.amountIncludesVat) {
+            return `VAT (${this.vatPercentage}% incl.)`;
+        } else {
+            return `VAT (${this.vatPercentage}%)`;
+        }
+    }
+
+    // Show VAT excluded section when prices don't include VAT
+    get showVatExcludedTotal() {
+        return this.hasVatConfig && !this.amountIncludesVat;
     }
 
     get isShowComboboxToSelectPricebook(){
@@ -268,6 +318,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                 if (ele.pbeList && ele.pbeList.length > 0 && ele.pbeList[0].Pricebook2) {
                     this.isoCode = ele.pbeList[0].Pricebook2.CurrencyIsoCode;
                 }
+                // Store VAT configuration from CMDT
+                this.vatRate = ele.vatRate;
+                this.amountIncludesVat = ele.amountIncludesVat !== false; // Default to true
             }
         });
     }
@@ -288,6 +341,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                 if (ele.pbeList && ele.pbeList.length > 0 && ele.pbeList[0].Pricebook2) {
                     this.isoCode = ele.pbeList[0].Pricebook2.CurrencyIsoCode;
                 }
+                // Store VAT configuration from CMDT
+                this.vatRate = ele.vatRate;
+                this.amountIncludesVat = ele.amountIncludesVat !== false; // Default to true
             }
         });
     }
@@ -365,6 +421,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                             if (priceBookId === ele.pb2.Id) {
                                 this.selectedPriceBookName = ele.pb2.Name;
                                 this.currentProductList = ele.pbeList;
+                                // Store VAT configuration from CMDT
+                                this.vatRate = ele.vatRate;
+                                this.amountIncludesVat = ele.amountIncludesVat !== false; // Default to true
                             }
                         });
                         this.handlerChangeQuantity();
@@ -414,6 +473,9 @@ export default class Dfj_ProductSelectorCmp extends LightningElement {
                 if (this.currentProductList && this.currentProductList.length > 0 && this.currentProductList[0].Pricebook2) {
                     this.isoCode = this.currentProductList[0].Pricebook2.CurrencyIsoCode;
                 }
+                // Store VAT configuration from CMDT
+                this.vatRate = this.fullProductData[0].vatRate;
+                this.amountIncludesVat = this.fullProductData[0].amountIncludesVat !== false; // Default to true
             }
         }
     }
