@@ -55,7 +55,7 @@
 
 | Permission Set | Purpose | Status |
 |----------------|---------|--------|
-| `PS_FEAT_ProductSelector` | General Product Selector access | ⬜ Deploy with Apex (Step 3) |
+| `PS_FEAT_ProductSelector` | General Product Selector access | ✅ Deployed |
 | `PS_PriceBook_DinFamiliejurist` | Grants DFJ pricebook access | ✅ Deployed |
 | `PS_PriceBook_DKPension` | Grants DK Pension access | ✅ Deployed |
 | `PS_PriceBook_Familjeavtal` | Grants Familjeavtal access | ✅ Deployed |
@@ -65,27 +65,35 @@
 
 | Class | Changes | Status |
 |-------|---------|--------|
-| `DFJProductController_Class.cls` | NEW - Added icon to wrapper, queries CMDT | ⬜ Not Deployed |
-| `DFJProductService_Class.cls` | NEW - Product selector service layer | ⬜ Not Deployed |
-| `DFJ_PaymentController.cls` | NEW - Payment controller | ⬜ Not Deployed |
-| `PS_PaymentController.cls` | MODIFIED - Payment controller updates | ⬜ Not Deployed |
-| `PS_PaymentService.cls` | MODIFIED - Payment service updates | ⬜ Not Deployed |
-| `PS_PaymentUtility.cls` | MODIFIED - Payment utility updates | ⬜ Not Deployed |
-| `PS_PaymentController_Test.cls` | MODIFIED - Test class updates | ⬜ Not Deployed |
-| `PS_PaymentService_Test.cls` | MODIFIED - Test class updates | ⬜ Not Deployed |
+| `DFJProductController_Class.cls` | NEW - Added icon to wrapper, queries CMDT | ✅ Deployed |
+| `DFJProductService_Class.cls` | NEW - Product selector service layer | ✅ Deployed |
+| `DFJ_PaymentController.cls` | NEW - Payment controller | ✅ Deployed |
+| `PS_PaymentController.cls` | MODIFIED - Payment controller updates | ✅ Deployed |
+| `PS_PaymentService.cls` | MODIFIED - Payment service updates | ✅ Deployed |
+| `PS_PaymentUtility.cls` | MODIFIED - Payment utility updates | ✅ Deployed |
+| `PS_PaymentController_Test.cls` | MODIFIED - Test class updates | ✅ Deployed |
+| `PS_PaymentService_Test.cls` | MODIFIED - Test class updates | ✅ Deployed |
 
 ### LWC Components
 
 | Component | Changes | Status |
 |-----------|---------|--------|
-| `dfj_ProductSelectorCmp` | Icon picker UI, styling, discount label | ⬜ Not Deployed |
-| `pS_EnhancedCreatePayment` | Premium modal styling | ⬜ Not Deployed |
+| `dfj_ProductSelectorCmp` | Icon picker UI, styling, discount label | ✅ Deployed |
+| `dfj_Payment_For_Opportunity` | Child component (dependency) | ✅ Deployed |
+| `dfj_PaymentStatus` | Child component (dependency) | ✅ Deployed |
+| `pS_EnhancedCreatePayment` | Premium modal styling | ✅ Deployed |
+
+### Static Resources
+
+| Resource | Status |
+|----------|--------|
+| `createPaymentButton` | ✅ Deployed |
 
 ### Flows
 
 | Flow | Version | Status |
 |------|---------|--------|
-| `SF_Add_Bundle_Discounts` | v7 | ⬜ Not Deployed |
+| `SF_Add_Bundle_Discounts` | v8 | ✅ Deployed |
 
 ---
 
@@ -139,67 +147,60 @@ sf project deploy start \
 
 ---
 
-### Step 3: Deploy Apex + PS_FEAT_ProductSelector
-**Status:** ⬜ Not Started
+### Step 3: Deploy Apex Classes
+**Status:** ✅ Completed (8 Dec 2025)
+
+**Validated Deploy ID:** `0AfW5000001cl8b` (767 tests passed)
 
 **Components:**
-- [ ] DFJProductController_Class.cls (NEW)
-- [ ] DFJProductService_Class.cls (NEW)
-- [ ] DFJ_PaymentController.cls (NEW)
-- [ ] PS_PaymentController.cls (MODIFIED)
-- [ ] PS_PaymentService.cls (MODIFIED)
-- [ ] PS_PaymentUtility.cls (MODIFIED)
-- [ ] PS_PaymentController_Test.cls (MODIFIED)
-- [ ] PS_PaymentService_Test.cls (MODIFIED)
-- [ ] PS_FEAT_ProductSelector.permissionset-meta.xml
+- [x] DFJProductController_Class.cls (NEW)
+- [x] DFJProductService_Class.cls (NEW)
+- [x] DFJ_PaymentController.cls (NEW)
+- [x] PS_PaymentController.cls (MODIFIED)
+- [x] PS_PaymentService.cls (MODIFIED)
+- [x] PS_PaymentUtility.cls (MODIFIED)
+- [x] + Test classes
 
-**Command:**
+**Command (Quick Deploy):**
 ```bash
-sf project deploy start \
-  --source-dir force-app/main/default/classes/DFJProductController_Class.cls \
-  --source-dir force-app/main/default/classes/DFJProductController_Class.cls-meta.xml \
-  --source-dir force-app/main/default/classes/DFJProductService_Class.cls \
-  --source-dir force-app/main/default/classes/DFJProductService_Class.cls-meta.xml \
-  --source-dir force-app/main/default/classes/DFJ_PaymentController.cls \
-  --source-dir force-app/main/default/classes/DFJ_PaymentController.cls-meta.xml \
-  --source-dir force-app/main/default/classes/PS_PaymentController.cls \
-  --source-dir force-app/main/default/classes/PS_PaymentController.cls-meta.xml \
-  --source-dir force-app/main/default/classes/PS_PaymentService.cls \
-  --source-dir force-app/main/default/classes/PS_PaymentService.cls-meta.xml \
-  --source-dir force-app/main/default/classes/PS_PaymentUtility.cls \
-  --source-dir force-app/main/default/classes/PS_PaymentUtility.cls-meta.xml \
-  --source-dir force-app/main/default/classes/PS_PaymentController_Test.cls \
-  --source-dir force-app/main/default/classes/PS_PaymentController_Test.cls-meta.xml \
-  --source-dir force-app/main/default/classes/PS_PaymentService_Test.cls \
-  --source-dir force-app/main/default/classes/PS_PaymentService_Test.cls-meta.xml \
-  --source-dir force-app/main/default/permissionsets/PS_FEAT_ProductSelector.permissionset-meta.xml \
-  --target-org MyProd
+sf project deploy quick --job-id 0AfW5000001cl8b --target-org my-prod
 ```
 
 **Notes:**
-- PS_FEAT_ProductSelector requires Apex classes to exist, so deploying together 
+- Quick deploy completed successfully
 
 ---
 
-### Step 4: Deploy LWC + Flow
-**Status:** ⬜ Not Started
+### Step 4: Deploy LWC + Flow + PS_FEAT_ProductSelector
+**Status:** ✅ Completed (8 Dec 2025)
 
 **Components:**
-- [ ] dfj_ProductSelectorCmp
-- [ ] pS_EnhancedCreatePayment
-- [ ] SF_Add_Bundle_Discounts (Flow v8)
+- [x] dfj_ProductSelectorCmp
+- [x] dfj_Payment_For_Opportunity (dependency)
+- [x] dfj_PaymentStatus (dependency)
+- [x] pS_EnhancedCreatePayment
+- [x] createPaymentButton (static resource - dependency)
+- [x] SF_Add_Bundle_Discounts (Flow v8)
+- [x] PS_FEAT_ProductSelector.permissionset-meta.xml
 
 **Command:**
 ```bash
 sf project deploy start \
   --source-dir force-app/main/default/lwc/dfj_ProductSelectorCmp \
+  --source-dir force-app/main/default/lwc/dfj_Payment_For_Opportunity \
+  --source-dir force-app/main/default/lwc/dfj_PaymentStatus \
   --source-dir force-app/main/default/lwc/pS_EnhancedCreatePayment \
+  --source-dir force-app/main/default/staticresources/createPaymentButton.css \
+  --source-dir force-app/main/default/staticresources/createPaymentButton.resource \
+  --source-dir force-app/main/default/staticresources/createPaymentButton.resource-meta.xml \
   --source-dir force-app/main/default/flows/SF_Add_Bundle_Discounts.flow-meta.xml \
-  --target-org MyProd
+  --source-dir force-app/main/default/permissionsets/PS_FEAT_ProductSelector.permissionset-meta.xml \
+  --target-org my-prod
 ```
 
 **Notes:**
-- Flow SF_Add_Bundle_Discounts v7 retrieved from sandbox 
+- Deploy ID: 0AfW5000001clwbKAA
+- Required additional dependencies: dfj_Payment_For_Opportunity, dfj_PaymentStatus, createPaymentButton 
 
 ---
 
@@ -239,6 +240,9 @@ sf project deploy start \
 | `DFJProductService_Class.cls` | ApexClass | ❌ Does not exist (NEW) |
 | `DFJ_PaymentController.cls` | ApexClass | ❌ Does not exist (NEW) |
 | `dfj_ProductSelectorCmp` | LWC | ❌ Does not exist (NEW) |
+| `dfj_Payment_For_Opportunity` | LWC | ❌ Does not exist (NEW) |
+| `dfj_PaymentStatus` | LWC | ❌ Does not exist (NEW) |
+| `createPaymentButton` | StaticResource | ❌ Does not exist (NEW) |
 
 ### Rollback Commands
 
@@ -277,6 +281,11 @@ If you need to remove the NEW components that didn't exist before:
 
 2. **NEW LWC** - Delete via Setup → Lightning Components:
    - `dfj_ProductSelectorCmp`
+   - `dfj_Payment_For_Opportunity`
+   - `dfj_PaymentStatus`
+
+3. **NEW Static Resource** - Delete via Setup → Static Resources:
+   - `createPaymentButton`
 
 ### Notes
 - CMDT, Custom Permissions, and Permission Sets (Step 1) do NOT need rollback - they have no functional impact without the Apex/LWC
@@ -289,4 +298,6 @@ If you need to remove the NEW components that didn't exist before:
 | Date | Step | Deployed By | Result | Notes |
 |------|------|-------------|--------|-------|
 | 8 Dec 2025 | Step 1 | Copilot | ✅ Success | Deploy ID: 0AfW5000001cj3ZKAQ - CMDT, Custom Permissions, 4 Permission Sets |
+| 8 Dec 2025 | Step 3 | Copilot | ✅ Success | Validated Deploy ID: 0AfW5000001cl8b - 15 Apex classes (767 tests passed) |
+| 8 Dec 2025 | Step 4 | Copilot | ✅ Success | Deploy ID: 0AfW5000001clwbKAA - 4 LWC, 1 Flow, 1 Static Resource, 1 Permission Set |
 
